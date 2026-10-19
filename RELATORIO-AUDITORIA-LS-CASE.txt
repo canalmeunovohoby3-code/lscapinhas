@@ -1,0 +1,127 @@
+# Auditoria técnica e funcional — LS Case
+
+## 1. Bugs encontrados
+
+1. **Modelo perdido entre o card e a página de detalhes sem filtro ativo.**
+   O card escolhia um modelo compatível apenas para exibição. Ao clicar, a página de detalhes usava somente o filtro global. Sem filtro, o modelo desaparecia e o carrinho recebia o item sem identificação.
+
+2. **Quick add do card usava somente o modelo global.**
+   Sem filtro ativo, o item era adicionado sem modelo, mesmo com um modelo aparecendo no card.
+
+3. **Adicionar ao carrinho alterava o filtro global.**
+   `addToCart` sobrescrevia o modelo selecionado no catálogo com o modelo do item. Isso podia mudar a listagem sem o cliente pedir.
+
+4. **Página de detalhes dependia exclusivamente do filtro global.**
+   Acesso direto ao produto, sem filtro e sem modelo na URL, não tinha identificação.
+
+5. **Relacionados podiam incluir aparelhos incompatíveis com o filtro ativo.**
+
+6. **Lógica de escolha do modelo duplicada e sem fonte única de verdade.**
+   Card, detalhe e quick add podiam divergir.
+
+7. **Memoização do catálogo ineficaz.**
+   O `useMemo` dependia de um objeto recriado a cada renderização.
+
+## 2. Arquivos alterados
+
+- `src/lib/productModel.ts` — **novo**: escolha determinística de modelo compatível e validação.
+- `src/lib/productModel.test.ts` — **novo**: testes da resolução de modelo.
+- `src/components/ProductCard.tsx` — modelo resolvido, link com `?modelo=` e envio ao quick add.
+- `src/components/QuickAddDialog.tsx` — recebe e valida o modelo do card; preserva no link de detalhes.
+- `src/pages/ProductPage.tsx` — lê o modelo da URL, valida compatibilidade, aplica no detalhe, carrinho e WhatsApp; relacionados filtrados pelo modelo ativo.
+- `src/pages/CatalogPage.tsx` — usa o modelo efetivo do filtro nos cards e no badge; memoização corrigida.
+- `src/pages/HomePage.tsx` — cards recebem a seleção atual ou fallback compatível.
+- `src/context/StoreContext.tsx` — adicionar ao carrinho não sobrescreve mais o filtro global.
+
+## 3. O que foi corrigido
+
+- O modelo exibido no card agora vai para a URL do produto: `/produto/slug?modelo=id`.
+- A página de detalhes resolve o modelo nesta ordem:
+  1. modelo da URL, se compatível;
+  2. modelo selecionado no catálogo, se compatível;
+  3. modelo compatível determinístico do próprio produto.
+- O quick add usa exatamente o modelo exibido no card.
+- O carrinho e a mensagem do WhatsApp recebem o modelo usado no detalhe/quick add.
+- Adicionar ao carrinho não altera mais o filtro global.
+- Produto sem compatibilidade cadastrada: nenhum modelo é inventado; a identificação é omitida.
+- Relacionados respeitam o modelo selecionado.
+- Sem filtro, cada card continua exibindo um modelo real da própria lista de compatibilidade, de forma estável.
+
+## 4. Testes executados e resultados
+
+### Testes automatizados
+- `npm test`: **6 arquivos, 50 testes aprovados**.
+- Novo `productModel.test.ts` com 6 testes:
+  - modelo padrão sempre compatível;
+  - escolha estável entre renderizações;
+  - modelo solicitado preservado;
+  - modelo incompatível rejeitado;
+  - fallback para o modelo selecionado;
+  - nenhum modelo inventado em produto sem compatibilidade;
+  - varredura de todos os produtos do catálogo.
+- `npm run build`: **aprovado**.
+
+### Auditoria funcional real em navegador headless
+Todos os fluxos abaixo foram executados com cliques e navegação reais:
+
+1. **Todas as capinhas → Galaxy S24**
+   - Card: `Galaxy S24`
+   - URL: `/produto/tartaruga-ambar?modelo=galaxy-s24`
+   - Detalhe: `Galaxy S24`
+   - Carrinho: `modelId: galaxy-s24`
+
+2. **iPhone**
+   - Card/detalhe: `iPhone 15 Plus`
+   - Carrinho: `modelId: iphone-15-plus`
+
+3. **Motorola**
+   - Card/detalhe: `Moto G84`
+   - Carrinho: `modelId: moto-g84`
+
+4. **Quick add do card**
+   - Exibiu `Modelo: Galaxy S24`
+   - Link de detalhes com `?modelo=galaxy-s24`
+   - Carrinho: `modelId: galaxy-s24`
+
+5. **Acesso direto sem filtro/URL**
+   - Detalhe do produto: `Moto G84`
+   - Carrinho: `modelId: moto-g84`
+   - Confirma que o detalhe não depende exclusivamente do filtro global.
+
+6. **Filtro Moto G84**
+   - Badge: `Compatível com Moto G84`
+   - 7 cards, todos exibindo `Moto G84`
+   - Detalhe e carrinho: `Moto G84`
+   - Filtro global permaneceu `moto-g84` após adicionar.
+
+7. **Dois modelos no mesmo carrinho**
+   - Itens: `Galaxy S24` e `Moto G84`
+   - Carrinho exibiu os dois modelos corretamente.
+   - Quantidade alterada de 1 para 2 no primeiro item.
+   - Subtotal: `R$ 99,80 + R$ 44,90 = R$ 144,70`.
+   - Total conferido: `R$ 144,70`.
+
+8. **WhatsApp**
+   - Checkout habilitado.
+   - Mensagem com as duas linhas de modelo, duas identificações, cliente `Ana` e total `R$ 144,70`.
+   - Link de dúvidas do produto também incluiu o modelo correto.
+
+9. **Erros de console**
+   - Nenhum `error`, `unhandledrejection` ou `console.error` capturado nas interações auditadas.
+
+### Filtros, busca e responsividade
+- 11 testes de filtros aprovados: busca por nome, modelo e marca; faixas de preço; ordenação; combinações.
+- Mobile em 390px:
+  - “Todas as capinhas” com modelos variados e reais.
+  - Filtro Moto G84 com todos os cards corretos.
+  - Sem estouro horizontal ou quebra de layout.
+
+## 5. Pontos de atenção
+
+- O catálogo atual não possui produto sem compatibilidade cadastrada. O caso vazio foi validado por teste unitário sintético.
+- A escolha do modelo padrão sem filtro é determinística pelo ID do produto. Se a compatibilidade do produto mudar, o modelo padrão pode mudar, mas continuará sendo um modelo real compatível.
+- A validação do WhatsApp foi feita sobre o link e o texto gerados, não pelo envio real de uma mensagem.
+- Não existe suíte E2E automatizada no projeto; a validação de interface foi executada em Chrome headless.
+- O filtro global não é alterado ao adicionar item. Isso é intencional para preservar a seleção do cliente.
+
+O servidor continua ativo em **http://localhost:5173/**.

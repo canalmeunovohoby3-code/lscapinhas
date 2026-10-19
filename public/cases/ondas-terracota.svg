@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1100" width="900" height="1100" role="img">
+    <defs>
+      <filter id="softShadow" x="-40%" y="-30%" width="180%" height="180%">
+        <feDropShadow dx="0" dy="28" stdDeviation="26" flood-color="#2E3639" flood-opacity="0.22"/>
+      </filter>
+      <filter id="paintBlur" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="28"/>
+      </filter>
+      <clipPath id="caseClip">
+        <rect x="242" y="124" width="416" height="852" rx="74"/>
+      </clipPath>
+      <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#CFA184"/><stop offset="0.55" stop-color="#CFA184" stop-opacity="0.65"/><stop offset="1" stop-color="#5A2E1E" stop-opacity="0.45"/></linearGradient>
+      <linearGradient id="gloss" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.34"/><stop offset="0.42" stop-color="#FFFFFF" stop-opacity="0.06"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
+      <linearGradient id="nightGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CFA184"/><stop offset="1" stop-color="#F1D9C8"/></linearGradient>
+    </defs>
+    <rect width="900" height="1100" fill="#F4E6DC"/>
+    <circle cx="710" cy="236" r="188" fill="#E8B696" opacity="0.28"/>
+    <circle cx="150" cy="900" r="150" fill="#C75D29" opacity="0.08"/>
+    <g filter="url(#softShadow)">
+      <rect x="230" y="112" width="440" height="876" rx="84" fill="url(#rim)"/>
+      <rect x="238" y="120" width="424" height="860" rx="80" fill="#F1D9C8"/>
+      <g clip-path="url(#caseClip)">
+        <path d="M 222 204 q 70 -54 140 0 t 140 0 t 140 0 t 140 0" fill="none" stroke="#C75D29" stroke-width="16" stroke-linecap="round" opacity="0.8"/><path d="M 222 302 q 70 -54 140 0 t 140 0 t 140 0 t 140 0" fill="none" stroke="#E8B696" stroke-width="8" stroke-linecap="round" opacity="0.65"/><path d="M 222 400 q 70 -54 140 0 t 140 0 t 140 0 t 140 0" fill="none" stroke="#C75D29" stroke-width="16" stroke-linecap="round" opacity="0.8"/><path d="M 222 498 q 70 -54 140 0 t 140 0 t 140 0 t 140 0" fill="none" stroke="#E8B696" stroke-width="8" stroke-linecap="round" opacity="0.65"/><path d="M 222 596 q 70 -54 140 0 t 140 0 t 140 0 t 140 0" fill="none" stroke="#C75D29" stroke-width="16" stroke-linecap="round" opacity="0.8"/><path d="M 222 694 q 70 -54 140 0 t 140 0 t 140 0 t 140 0" fill="none" stroke="#E8B696" stroke-width="8" stroke-linecap="round" opacity="0.65"/><path d="M 222 792 q 70 -54 140 0 t 140 0 t 140 0 t 140 0" fill="none" stroke="#C75D29" stroke-width="16" stroke-linecap="round" opacity="0.8"/><path d="M 222 890 q 70 -54 140 0 t 140 0 t 140 0 t 140 0" fill="none" stroke="#E8B696" stroke-width="8" stroke-linecap="round" opacity="0.65"/><path d="M 222 988 q 70 -54 140 0 t 140 0 t 140 0 t 140 0" fill="none" stroke="#C75D29" stroke-width="16" stroke-linecap="round" opacity="0.8"/>
+        <rect x="242" y="124" width="416" height="852" fill="url(#gloss)"/>
+      </g>
+      <rect x="268" y="152" width="188" height="188" rx="50" fill="#F1D9C8" stroke="#CFA184" stroke-width="2"/>
+      <rect x="268" y="152" width="188" height="188" rx="50" fill="#5A2E1E" opacity="0.06"/>
+      <circle cx="314" cy="198" r="27" fill="#CFA184"/>
+      <circle cx="314" cy="198" r="19" fill="#2E3639"/>
+      <circle cx="314" cy="198" r="9" fill="#111A1D"/>
+      <circle cx="307" cy="191" r="4" fill="#FFFFFF" opacity="0.5"/>
+      <circle cx="314" cy="288" r="27" fill="#CFA184"/>
+      <circle cx="314" cy="288" r="19" fill="#2E3639"/>
+      <circle cx="314" cy="288" r="9" fill="#111A1D"/>
+      <circle cx="307" cy="281" r="4" fill="#FFFFFF" opacity="0.5"/>
+      <circle cx="402" cy="198" r="27" fill="#CFA184"/>
+      <circle cx="402" cy="198" r="19" fill="#2E3639"/>
+      <circle cx="402" cy="198" r="9" fill="#111A1D"/>
+      <circle cx="395" cy="191" r="4" fill="#FFFFFF" opacity="0.5"/>
+      <circle cx="402" cy="288" r="8" fill="#F8E6C8" opacity="0.9"/>
+      <text x="450" y="930" text-anchor="middle" font-family="Sora, Arial, sans-serif" font-size="24" letter-spacing="7" fill="#5A2E1E" opacity="0.5">LS</text>
+      <rect x="222" y="286" width="9" height="88" rx="4" fill="#CFA184"/>
+      <rect x="222" y="392" width="9" height="58" rx="4" fill="#CFA184"/>
+      <rect x="669" y="330" width="9" height="118" rx="4" fill="#CFA184"/>
+    </g>
+  </svg>

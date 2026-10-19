@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1100" width="900" height="1100" role="img">
+    <defs>
+      <filter id="detailBlur" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="55"/></filter>
+    </defs>
+    <rect width="900" height="1100" fill="#F2E9E1"/>
+    <circle cx="450" cy="550" r="360" fill="#C9A88D" opacity="0.25" filter="url(#detailBlur)"/>
+    <g transform="rotate(-5 450 550)">
+      <g transform="translate(-482 -328) scale(2.05)">
+        
+    <defs>
+      <filter id="softShadow" x="-40%" y="-30%" width="180%" height="180%">
+        <feDropShadow dx="0" dy="28" stdDeviation="26" flood-color="#2E3639" flood-opacity="0.22"/>
+      </filter>
+      <filter id="paintBlur" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="28"/>
+      </filter>
+      <clipPath id="caseClip">
+        <rect x="242" y="124" width="416" height="852" rx="74"/>
+      </clipPath>
+      <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D4B9A2"/><stop offset="0.55" stop-color="#D4B9A2" stop-opacity="0.65"/><stop offset="1" stop-color="#2E3639" stop-opacity="0.45"/></linearGradient>
+      <linearGradient id="gloss" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.34"/><stop offset="0.42" stop-color="#FFFFFF" stop-opacity="0.06"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
+      <linearGradient id="nightGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D4B9A2"/><stop offset="1" stop-color="#FAF2E8"/></linearGradient>
+    </defs>
+    <rect width="900" height="1100" fill="#F2E9E1"/>
+    <circle cx="710" cy="236" r="188" fill="#C9A88D" opacity="0.28"/>
+    <circle cx="150" cy="900" r="150" fill="#C75D29" opacity="0.08"/>
+    <g filter="url(#softShadow)">
+      <rect x="230" y="112" width="440" height="876" rx="84" fill="url(#rim)"/>
+      <rect x="238" y="120" width="424" height="860" rx="80" fill="#FAF2E8"/>
+      <g clip-path="url(#caseClip)">
+        <text x="450" y="424" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="104" fill="#C75D29">seu nome</text><path d="M 347 464 q 60 18 120 0 t 120 0" fill="none" stroke="#2E3639" stroke-width="2" opacity="0.35"/><text x="450" y="534" text-anchor="middle" font-family="Manrope, Arial, sans-serif" font-size="20" letter-spacing="10" fill="#2E3639" opacity="0.7">SÓ SUA</text><polygon points="595.1,657.1 596.6,667.6 607.1,669.0 596.6,670.5 595.1,681.0 593.7,670.5 583.2,669.0 593.7,667.6" fill="#C75D29" opacity="0.6"/><polygon points="498.1,715.5 499.5,722.4 506.4,723.8 499.5,725.2 498.1,732.0 496.7,725.2 489.9,723.8 496.7,722.4" fill="#C75D29" opacity="0.6"/><polygon points="479.5,795.3 480.9,800.8 486.4,802.2 480.9,803.6 479.5,809.1 478.1,803.6 472.6,802.2 478.1,800.8" fill="#C75D29" opacity="0.6"/><polygon points="590.2,598.5 591.6,604.5 597.6,606.0 591.6,607.4 590.2,613.4 588.8,607.4 582.8,606.0 588.8,604.5" fill="#C75D29" opacity="0.6"/><polygon points="410.4,621.7 411.8,631.2 421.2,632.6 411.8,634.0 410.4,643.5 408.9,634.0 399.5,632.6 408.9,631.2" fill="#C75D29" opacity="0.6"/><polygon points="404.4,736.7 405.8,740.8 409.9,742.2 405.8,743.6 404.4,747.7 403.0,743.6 398.9,742.2 403.0,740.8" fill="#C75D29" opacity="0.6"/><polygon points="577.7,592.2 579.1,599.2 586.1,600.6 579.1,602.0 577.7,609.0 576.2,602.0 569.2,600.6 576.2,599.2" fill="#C75D29" opacity="0.6"/><polygon points="445.8,614.5 447.2,619.2 451.9,620.6 447.2,622.0 445.8,626.7 444.4,622.0 439.7,620.6 444.4,619.2" fill="#C75D29" opacity="0.6"/>
+        <rect x="242" y="124" width="416" height="852" fill="url(#gloss)"/>
+      </g>
+      <rect x="268" y="152" width="188" height="188" rx="50" fill="#FAF2E8" stroke="#D4B9A2" stroke-width="2"/>
+      <rect x="268" y="152" width="188" height="188" rx="50" fill="#2E3639" opacity="0.06"/>
+      <circle cx="314" cy="198" r="27" fill="#D4B9A2"/>
+      <circle cx="314" cy="198" r="19" fill="#2E3639"/>
+      <circle cx="314" cy="198" r="9" fill="#111A1D"/>
+      <circle cx="307" cy="191" r="4" fill="#FFFFFF" opacity="0.5"/>
+      <circle cx="314" cy="288" r="27" fill="#D4B9A2"/>
+      <circle cx="314" cy="288" r="19" fill="#2E3639"/>
+      <circle cx="314" cy="288" r="9" fill="#111A1D"/>
+      <circle cx="307" cy="281" r="4" fill="#FFFFFF" opacity="0.5"/>
+      <circle cx="402" cy="198" r="27" fill="#D4B9A2"/>
+      <circle cx="402" cy="198" r="19" fill="#2E3639"/>
+      <circle cx="402" cy="198" r="9" fill="#111A1D"/>
+      <circle cx="395" cy="191" r="4" fill="#FFFFFF" opacity="0.5"/>
+      <circle cx="402" cy="288" r="8" fill="#F8E6C8" opacity="0.9"/>
+      <text x="450" y="930" text-anchor="middle" font-family="Sora, Arial, sans-serif" font-size="24" letter-spacing="7" fill="#2E3639" opacity="0.5">LS</text>
+      <rect x="222" y="286" width="9" height="88" rx="4" fill="#D4B9A2"/>
+      <rect x="222" y="392" width="9" height="58" rx="4" fill="#D4B9A2"/>
+      <rect x="669" y="330" width="9" height="118" rx="4" fill="#D4B9A2"/>
+    </g>
+  
+      </g>
+    </g>
+    <rect x="0" y="0" width="900" height="1100" fill="none" stroke="#D4B9A2" stroke-width="0" opacity="0"/>
+  </svg>

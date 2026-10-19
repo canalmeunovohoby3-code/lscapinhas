@@ -1,0 +1,9 @@
+@import './base.css';
+@import './header-hero.css';
+@import './home.css';
+@import './catalog.css';
+@import './product.css';
+@import './carousel.css';
+@import './cart-contact.css';
+@import './overlays.css';
+@import './responsive.css';

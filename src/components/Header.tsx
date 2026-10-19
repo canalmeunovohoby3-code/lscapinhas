@@ -1,0 +1,162 @@
+import { useEffect, useState, type FormEvent } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useStore } from '../context/StoreContext';
+import { site } from '../data/site';
+import { buildGeneralWhatsAppUrl } from '../lib/whatsapp';
+import { BrandLogo } from './BrandLogo';
+import { BagIcon, MenuIcon, SearchIcon, WhatsAppIcon } from './Icons';
+import { MobileMenu } from './MobileMenu';
+
+const navLinks = [
+  { to: '/', label: 'Início', end: true },
+  { to: '/capinhas', label: 'Capinhas' },
+  { to: '/contato', label: 'Contato' },
+];
+
+export function Header() {
+  const { cartCount } = useStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [term, setTerm] = useState('');
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    setMenuOpen(false);
+    setSearchOpen(false);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 8);
+    }
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  function submitSearch(event: FormEvent) {
+    event.preventDefault();
+    const query = term.trim();
+    navigate(query ? `/capinhas?q=${encodeURIComponent(query)}` : '/capinhas');
+    setSearchOpen(false);
+  }
+
+  return (
+    <>
+      <header className={`site-header${scrolled ? ' is-scrolled' : ''}`}>
+        <div className="header-main">
+          <div className="container header-main-inner">
+            <button
+              type="button"
+              className="icon-button header-menu-button"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Abrir menu"
+              aria-expanded={menuOpen}
+            >
+              <MenuIcon width={22} height={22} />
+            </button>
+
+            <Link to="/" className="header-logo" aria-label={`${site.fullName} — página inicial`}>
+              <BrandLogo eager light />
+            </Link>
+
+            <form className="header-search" role="search" onSubmit={submitSearch}>
+              <SearchIcon width={17} height={17} />
+              <input
+                type="search"
+                value={term}
+                onChange={(event) => setTerm(event.target.value)}
+                placeholder="Buscar capinha ou modelo"
+                aria-label="Buscar capinhas ou modelos de celular"
+              />
+            </form>
+
+            <div className="header-actions">
+              <button
+                type="button"
+                className="icon-button header-search-toggle"
+                onClick={() => setSearchOpen((value) => !value)}
+                aria-label={searchOpen ? 'Fechar busca' : 'Abrir busca'}
+                aria-expanded={searchOpen}
+              >
+                <SearchIcon width={20} height={20} />
+              </button>
+
+              <a
+                className="header-whatsapp"
+                href={buildGeneralWhatsAppUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Falar com a LS Case pelo WhatsApp"
+                title="Falar no WhatsApp"
+              >
+                <WhatsAppIcon width={19} height={19} />
+              </a>
+
+              <Link
+                to="/carrinho"
+                className="header-cart"
+                aria-label={`Carrinho com ${cartCount} ${cartCount === 1 ? 'item' : 'itens'}`}
+              >
+                <BagIcon width={19} height={19} />
+                <span className="header-cart-label">Carrinho</span>
+                {cartCount > 0 && <span className="header-cart-count">{cartCount}</span>}
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="header-sub">
+          <div className="container header-sub-inner">
+            <nav className="header-nav" aria-label="Navegação principal">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  end={link.end}
+                  className={({ isActive }) => `header-nav-link${isActive ? ' is-active' : ''}`}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </nav>
+
+            <a
+              className="header-support"
+              href={buildGeneralWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <WhatsAppIcon width={15} height={15} />
+              <span>Atendimento pelo WhatsApp</span>
+              <strong>{site.whatsapp.display}</strong>
+            </a>
+          </div>
+        </div>
+
+        {searchOpen && (
+          <div className="mobile-search">
+            <form className="container mobile-search-form" role="search" onSubmit={submitSearch}>
+              <SearchIcon width={18} height={18} />
+              <input
+                type="search"
+                value={term}
+                onChange={(event) => setTerm(event.target.value)}
+                placeholder="Buscar capinha ou modelo"
+                aria-label="Buscar capinhas ou modelos de celular"
+                autoFocus
+              />
+              <button type="submit" className="btn btn-primary btn-small">
+                Buscar
+              </button>
+            </form>
+          </div>
+        )}
+      </header>
+
+      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+    </>
+  );
+}
