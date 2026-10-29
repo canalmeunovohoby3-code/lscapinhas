@@ -4,6 +4,7 @@ import { ArrowRightIcon } from '../components/Icons';
 import { supabase } from '../lib/supabase';
 import { usePageMeta } from '../lib/usePageMeta';
 import { formatDateTime, shortOrderId } from './format';
+import { formatOrderItemLabel } from './orderItems';
 import {
   STATUS_OPTIONS,
   getStatusLabel,
@@ -233,7 +234,7 @@ export function AdminOrdersPage() {
                       <td>
                         <span className="admin-models-cell">
                           {items.length > 0
-                            ? items.map((item) => `${item.model_name} ×${item.quantity}`).join(', ')
+                            ? items.map((item) => `${formatOrderItemLabel(item)} ×${item.quantity}`).join(', ')
                             : '—'}
                         </span>
                       </td>

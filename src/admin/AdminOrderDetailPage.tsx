@@ -4,6 +4,7 @@ import { ArrowRightIcon, WhatsAppIcon } from '../components/Icons';
 import { supabase } from '../lib/supabase';
 import { usePageMeta } from '../lib/usePageMeta';
 import { formatDateTime, shortOrderId } from './format';
+import { resolveOrderItem } from './orderItems';
 import {
   STATUS_OPTIONS,
   getStatusLabel,
@@ -305,15 +306,19 @@ export function AdminOrderDetailPage() {
             <p className="admin-muted">Nenhum item registrado.</p>
           ) : (
             <ul className="admin-item-list">
-              {items.map((item) => (
-                <li key={item.id} className="admin-item">
-                  <div>
-                    <span className="admin-item-brand">{item.brand_name}</span>
-                    <strong>{item.model_name}</strong>
-                  </div>
-                  <span className="admin-item-qty">×{item.quantity}</span>
-                </li>
-              ))}
+              {items.map((item) => {
+                const { brandName, modelName } = resolveOrderItem(item);
+
+                return (
+                  <li key={item.id} className="admin-item">
+                    <div>
+                      <span className="admin-item-brand">{brandName}</span>
+                      <strong>{modelName}</strong>
+                    </div>
+                    <span className="admin-item-qty">×{item.quantity}</span>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>

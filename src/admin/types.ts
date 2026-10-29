@@ -4,9 +4,9 @@ export interface AdminOrderItem {
   id: string;
   order_id: string;
   brand_id: string;
-  brand_name: string;
+  brand_name: string | null;
   model_id: string;
-  model_name: string;
+  model_name: string | null;
   quantity: number;
   created_at: string;
 }
