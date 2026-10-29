@@ -48,6 +48,12 @@ describe('fluxo público de pedidos', () => {
     }
   });
 
+  it('mantém um link discreto para a área administrativa no rodapé', () => {
+    const source = read('src/components/Footer.tsx');
+    expect(source).toContain('to="/admin/login"');
+    expect(source).toContain('Área administrativa');
+  });
+
   it('não apresenta valores ou cálculos monetários no fluxo e no admin', () => {
     const forbidden = /R\$|formatBRL|\.price\b|\bprice\b|\bpreço\b|\bprecos\b|subtotal|unitPrice|discount/i;
 

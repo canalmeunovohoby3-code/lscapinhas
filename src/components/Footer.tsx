@@ -73,6 +73,9 @@ export function Footer() {
             © {year} {site.fullName}. Todos os direitos reservados.
           </p>
           <p className="footer-demo-note">Catálogo demonstrativo sujeito à atualização.</p>
+          <Link to="/admin/login" className="footer-admin-link">
+            Área administrativa
+          </Link>
         </div>
       </div>
     </footer>

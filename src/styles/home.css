@@ -984,3 +984,13 @@
 .footer-demo-note {
   text-align: right;
 }
+
+.footer-admin-link {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 10px;
+  transition: color var(--transition);
+}
+
+.footer-admin-link:hover {
+  color: rgba(255, 255, 255, 0.76);
+}
