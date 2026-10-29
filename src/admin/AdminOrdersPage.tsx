@@ -1,8 +1,15 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type FormEvent,
+  type MouseEvent,
+} from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowRightIcon } from '../components/Icons';
 import { supabase } from '../lib/supabase';
 import { usePageMeta } from '../lib/usePageMeta';
+import { getPeriodRange, PERIOD_OPTIONS, type PeriodPreset } from './dateRange';
 import { formatDateTime, shortOrderId } from './format';
 import { formatOrderItemLabel } from './orderItems';
 import {
@@ -29,6 +36,7 @@ export function AdminOrdersPage() {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'' | OrderStatus>('');
+  const [period, setPeriod] = useState<PeriodPreset>('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
@@ -90,10 +98,35 @@ export function AdminOrdersPage() {
     setSearch(searchInput.trim());
   }
 
+  function handlePeriodChange(nextPeriod: PeriodPreset) {
+    setPeriod(nextPeriod);
+
+    if (nextPeriod === 'custom') return;
+
+    const range = getPeriodRange(nextPeriod);
+    setDateFrom(range.from);
+    setDateTo(range.to);
+  }
+
+  function openDatePicker(event: MouseEvent<HTMLInputElement>) {
+    const input = event.currentTarget as HTMLInputElement & {
+      showPicker?: () => void;
+    };
+
+    if (typeof input.showPicker !== 'function') return;
+
+    try {
+      input.showPicker();
+    } catch {
+      // O navegador pode bloquear o picker; o campo continua editável.
+    }
+  }
+
   function clearFilters() {
     setSearchInput('');
     setSearch('');
     setStatusFilter('');
+    setPeriod('all');
     setDateFrom('');
     setDateTo('');
   }
@@ -138,11 +171,28 @@ export function AdminOrdersPage() {
         </label>
 
         <label className="field admin-field">
+          <span className="field-label">Período</span>
+          <select
+            className="select-field"
+            value={period}
+            onChange={(event) => handlePeriodChange(event.target.value as PeriodPreset)}
+          >
+            {PERIOD_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className="field admin-field">
           <span className="field-label">De</span>
           <input
             type="date"
             value={dateFrom}
-            onChange={(event) => setDateFrom(event.target.value)}
+            onChange={(event) => {
+              setPeriod('custom');
+              setDateFrom(event.target.value);
+            }}
+            onClick={openDatePicker}
           />
         </label>
 
@@ -151,7 +201,11 @@ export function AdminOrdersPage() {
           <input
             type="date"
             value={dateTo}
-            onChange={(event) => setDateTo(event.target.value)}
+            onChange={(event) => {
+              setPeriod('custom');
+              setDateTo(event.target.value);
+            }}
+            onClick={openDatePicker}
           />
         </label>
 

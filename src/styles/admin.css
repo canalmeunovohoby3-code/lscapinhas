@@ -1609,3 +1609,42 @@
     height: 48px;
   }
 }
+
+/* Filter bar with date presets */
+.admin-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.admin-filter-search {
+  flex: 1 1 220px;
+}
+
+.admin-filter-bar .admin-field {
+  flex: 0 1 145px;
+}
+
+.admin-filter-actions {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 1100px) {
+  .admin-filter-bar .admin-field {
+    flex: 0 1 135px;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-filter-search {
+    flex: 1 1 100%;
+  }
+
+  .admin-filter-bar .admin-field {
+    flex: 1 1 calc(50% - 5px);
+  }
+
+  .admin-filter-actions {
+    flex: 1 1 100%;
+  }
+}
