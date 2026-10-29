@@ -1,15 +1,11 @@
 :root {
-  color-scheme: light;
   --white: #ffffff;
-  --card-bg: #ffffff;
-  --page-bg: #ffffff;
-  --footer-bg: #272f32;
-  --orange: #a9491f;
-  --orange-dark: #8f3a1a;
-  --orange-hover: #973d1b;
+  --orange: #c75d29;
+  --orange-dark: #a9491f;
+  --orange-hover: #b45122;
   --orange-light: #e9a27d;
   --orange-soft: #f9ece4;
-  --orange-line: rgba(180, 81, 34, 0.24);
+  --orange-line: rgba(199, 93, 41, 0.22);
   --ink: #2e3639;
   --ink-soft: #465155;
   --ink-deep: #232a2d;
@@ -40,8 +36,8 @@
   --line: #e7e1d9;
   --line-strong: #d8d1c7;
   --line-soft: #f0ebe5;
-  --muted: #5f6b6e;
-  --muted-light: #626e71;
+  --muted: #6b7376;
+  --muted-light: #8b9294;
   --danger: #a33b1c;
   --danger-soft: #fbeae3;
   --font-display: 'Sora', 'Segoe UI', system-ui, sans-serif;
@@ -62,50 +58,6 @@
   --transition-slow: 620ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-:root[data-theme='dark'] {
-  color-scheme: dark;
-  --card-bg: #1e2629;
-  --page-bg: #101618;
-  --footer-bg: #0a1012;
-  --orange: #f0a071;
-  --orange-dark: #ffc09a;
-  --orange-hover: #f6b28b;
-  --orange-light: #f4b992;
-  --orange-soft: #382a23;
-  --orange-line: rgba(240, 160, 113, 0.35);
-  --ink: #f3eee7;
-  --ink-soft: #d3cdc5;
-  --ink-deep: #f8f3ec;
-  --brown-light: #b86f49;
-  --brown-base: #a35a38;
-  --brown-dark: #84432a;
-  --brown-line: rgba(184, 111, 73, 0.35);
-  --header-bg: #0b1113;
-  --header-bg-sub: #0f1618;
-  --header-surface: #293336;
-  --header-line: rgba(255, 255, 255, 0.08);
-  --header-line-strong: rgba(255, 255, 255, 0.2);
-  --header-text: #f5f1ea;
-  --header-muted: #b4bdbd;
-  --header-hover: rgba(255, 255, 255, 0.08);
-  --cream: #141b1d;
-  --cream-deep: #182023;
-  --sand: #283235;
-  --surface: #1a2225;
-  --surface-warm: #232c2f;
-  --line: #364245;
-  --line-strong: #4d5a5d;
-  --line-soft: #2a3437;
-  --muted: #b9c2c3;
-  --muted-light: #a2adaf;
-  --danger: #ffb3a6;
-  --danger-soft: #3a2524;
-  --shadow-brand: 0 8px 18px rgba(0, 0, 0, 0.35);
-  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.25);
-  --shadow-lift: 0 14px 30px rgba(0, 0, 0, 0.35);
-  --focus-ring: 0 0 0 3px rgba(240, 160, 113, 0.25);
-}
-
 *,
 *::before,
 *::after {
@@ -124,7 +76,7 @@ body {
   font-size: 16px;
   line-height: 1.6;
   color: var(--ink);
-  background: var(--page-bg);
+  background: var(--white);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -233,8 +185,8 @@ legend {
   left: 10px;
   z-index: 1000;
   transform: translateY(-150%);
-  background: var(--header-bg);
-  color: var(--header-text);
+  background: var(--ink);
+  color: var(--white);
   padding: 10px 16px;
   border-radius: var(--radius-sm);
   font-size: 13px;
@@ -383,7 +335,7 @@ legend {
 }
 
 .btn-outline {
-  background: var(--card-bg);
+  background: var(--white);
   border-color: var(--line-strong);
   color: var(--ink);
 }
@@ -526,7 +478,7 @@ legend {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: var(--card-bg);
+  background: var(--white);
   padding: 0 12px;
   height: 44px;
   font-size: 13px;

@@ -41,7 +41,7 @@
   padding: 22px;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: var(--card-bg);
+  background: var(--white);
 }
 
 .order-form-section-head {
@@ -157,7 +157,7 @@
   padding: 8px 10px;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-xs);
-  background: var(--card-bg);
+  background: var(--white);
 }
 
 .order-file-name {
@@ -364,7 +364,7 @@
   padding: 13px 16px;
   border: 1px solid var(--orange-line);
   border-radius: var(--radius);
-  background: var(--card-bg);
+  background: var(--white);
 }
 
 .order-success-code span {

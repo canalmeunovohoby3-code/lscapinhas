@@ -41,7 +41,7 @@
 /* Catálogo de aparelhos */
 .model-catalog-section {
   padding: 28px 0 64px;
-  background: var(--card-bg);
+  background: var(--white);
 }
 
 .model-catalog-toolbar {
@@ -222,7 +222,7 @@
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: var(--card-bg);
+  background: var(--white);
 }
 
 .catalog-search {
@@ -235,7 +235,7 @@
   padding: 0 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: var(--card-bg);
+  background: var(--white);
   color: var(--muted);
   transition: border-color var(--transition), box-shadow var(--transition);
 }
@@ -317,7 +317,7 @@
   padding: 0 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: var(--card-bg);
+  background: var(--white);
   color: var(--ink);
   font-size: 12px;
   font-weight: 600;
@@ -344,7 +344,7 @@
   padding: 0 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: var(--card-bg);
+  background: var(--white);
   color: var(--ink-soft);
   font-size: 11.5px;
   font-weight: 700;
@@ -400,7 +400,7 @@
   padding: 56px 24px;
   border: 1px dashed var(--line-strong);
   border-radius: var(--radius-lg);
-  background: var(--card-bg);
+  background: var(--white);
   text-align: center;
 }
 

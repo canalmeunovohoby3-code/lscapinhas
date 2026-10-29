@@ -7,7 +7,6 @@ import { buildGeneralWhatsAppUrl } from '../lib/whatsapp';
 import { BrandLogo } from './BrandLogo';
 import { BagIcon, MenuIcon, SearchIcon, WhatsAppIcon } from './Icons';
 import { MobileMenu } from './MobileMenu';
-import { ThemeToggle } from './ThemeToggle';
 
 const navLinks = [
   { to: '/', label: 'Início', end: true },
@@ -109,8 +108,6 @@ export function Header() {
             </form>
 
             <div className="header-actions">
-              <ThemeToggle />
-
               <button
                 type="button"
                 className="icon-button header-search-toggle"

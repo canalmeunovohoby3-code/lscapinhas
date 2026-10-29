@@ -1,6 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { StoreProvider } from './context/StoreContext';
-import { ThemeProvider } from './context/ThemeContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
@@ -15,8 +14,7 @@ import { AdminApp } from './admin/AdminApp';
 
 function PublicStore() {
   return (
-    <ThemeProvider>
-      <StoreProvider>
+    <StoreProvider>
       <ScrollToTop />
       <a href="#conteudo" className="skip-link">
         Ir para o conteúdo
@@ -37,8 +35,7 @@ function PublicStore() {
       </main>
       <Footer />
       <Toast />
-      </StoreProvider>
-    </ThemeProvider>
+    </StoreProvider>
   );
 }
 
