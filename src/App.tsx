@@ -6,7 +6,6 @@ import { ScrollToTop } from './components/ScrollToTop';
 import { Toast } from './components/Toast';
 import { HomePage } from './pages/HomePage';
 import { CatalogPage } from './pages/CatalogPage';
-import { ProductPage } from './pages/ProductPage';
 import { CartPage } from './pages/CartPage';
 import { OrderPage } from './pages/OrderPage';
 import { ContactPage } from './pages/ContactPage';
@@ -26,7 +25,7 @@ function PublicStore() {
           <Route path="/" element={<HomePage />} />
           <Route path="/capinhas" element={<CatalogPage />} />
           <Route path="/personalizadas" element={<Navigate to="/capinhas" replace />} />
-          <Route path="/produto/:slug" element={<ProductPage />} />
+          <Route path="/produto/:slug" element={<Navigate to="/capinhas" replace />} />
           <Route path="/solicitacao" element={<CartPage />} />
           <Route path="/carrinho" element={<CartPage />} />
           <Route path="/pedido" element={<OrderPage />} />

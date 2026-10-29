@@ -27,10 +27,8 @@ const publicOrderFlow = [
 
 const priceFreeFlow = [
   ...publicOrderFlow,
-  'src/pages/ProductPage.tsx',
   'src/pages/CatalogPage.tsx',
   'src/pages/HomePage.tsx',
-  'src/components/InspirationCard.tsx',
   'src/components/PhoneModelCard.tsx',
   'src/components/ModelCardGrid.tsx',
   'src/admin/AdminDashboard.tsx',

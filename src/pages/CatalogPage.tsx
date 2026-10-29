@@ -1,7 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowRightIcon, CloseIcon, SearchIcon } from '../components/Icons';
-import { InspirationCard } from '../components/InspirationCard';
+import { CloseIcon, SearchIcon } from '../components/Icons';
 import { ModelCardGrid } from '../components/ModelCardGrid';
 import { useStore } from '../context/StoreContext';
 import { catalog, getModelById } from '../data/catalog';
@@ -180,36 +179,6 @@ export function CatalogPage() {
               </div>
             </div>
           )}
-        </div>
-      </section>
-
-      <section className="inspirations inspirations--catalog">
-        <div className="container">
-          <div className="inspirations-head">
-            <div>
-              <p className="eyebrow">Inspirações</p>
-              <h2>Estampas para inspirar a sua arte.</h2>
-              <p>
-                Os modelos abaixo são apenas exemplos. A sua foto ou arte é enviada pelo
-                formulário do site.
-              </p>
-            </div>
-            <a href="#modelos" className="inline-link">
-              Escolher modelo
-              <ArrowRightIcon width={15} height={15} />
-            </a>
-          </div>
-
-          <div className="product-grid inspiration-grid">
-            {catalog.products.map((product, index) => (
-              <InspirationCard
-                key={product.id}
-                product={product}
-                modelId={selectedModelId}
-                eager={index < 4}
-              />
-            ))}
-          </div>
         </div>
       </section>
     </div>
