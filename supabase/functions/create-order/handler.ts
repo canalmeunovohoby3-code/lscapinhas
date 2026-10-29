@@ -13,13 +13,28 @@ export interface CreateOrderInput {
   items: OrderItemInput[];
 }
 
+export interface CreatedOrder {
+  orderId: string;
+  uploadToken: string | null;
+}
+
 export interface CreateOrderDeps {
   allowedOrigin: string;
-  consumeRateLimit: () => Promise<boolean>;
-  createOrder: (input: CreateOrderInput) => Promise<string>;
+  getClientKey: (request: Request) => Promise<string | null>;
+  consumeRateLimit: (clientKey: string | null) => Promise<boolean>;
+  createOrder: (input: CreateOrderInput, idempotencyKey: string) => Promise<CreatedOrder>;
+}
+
+export class IdempotencyConflictError extends Error {
+  constructor() {
+    super('IDEMPOTENCY_CONFLICT');
+    this.name = 'IdempotencyConflictError';
+  }
 }
 
 const MAX_BODY_BYTES = 25_000;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_NAME_LENGTH = 120;
 const MAX_CONTACT_LENGTH = 80;
 const MAX_NOTES_LENGTH = 1_000;
@@ -37,13 +52,19 @@ function corsHeaders(origin: string): HeadersInit {
   };
 }
 
-function jsonResponse(status: number, body: unknown, origin: string): Response {
+function jsonResponse(
+  status: number,
+  body: unknown,
+  origin: string,
+  extraHeaders: HeadersInit = {},
+): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       ...corsHeaders(origin),
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
+      ...extraHeaders,
     },
   });
 }
@@ -157,6 +178,14 @@ export async function handleCreateOrder(
     return jsonResponse(400, { error: 'Corpo da requisição inválido.' }, origin);
   }
 
+  const idempotencyKey = typeof parsedBody.idempotencyKey === 'string'
+    ? parsedBody.idempotencyKey.trim()
+    : '';
+
+  if (!UUID_PATTERN.test(idempotencyKey)) {
+    return jsonResponse(400, { error: 'Chave de idempotência inválida.' }, origin);
+  }
+
   let input: CreateOrderInput;
 
   try {
@@ -169,24 +198,40 @@ export async function handleCreateOrder(
   }
 
   try {
-    const withinRateLimit = await deps.consumeRateLimit();
+    const clientKey = await deps.getClientKey(request);
+    const withinRateLimit = await deps.consumeRateLimit(clientKey);
 
     if (!withinRateLimit) {
       return jsonResponse(
         429,
         { error: 'Muitas solicitações. Tente novamente em instantes.' },
         origin,
+        { 'Retry-After': '60' },
       );
     }
 
-    const orderId = await deps.createOrder(input);
+    const created = await deps.createOrder(input, idempotencyKey);
 
-    if (typeof orderId !== 'string' || orderId.length === 0) {
+    if (!created || typeof created.orderId !== 'string' || created.orderId.length === 0) {
       throw new Error('Resposta inválida ao criar o pedido.');
     }
 
-    return jsonResponse(201, { orderId }, origin);
+    return jsonResponse(
+      201,
+      { orderId: created.orderId, uploadToken: created.uploadToken },
+      origin,
+    );
   } catch (error) {
+    if (error instanceof IdempotencyConflictError) {
+      return jsonResponse(
+        409,
+        {
+          error: 'Esta solicitação já foi enviada com dados diferentes. Inicie um novo pedido.',
+        },
+        origin,
+      );
+    }
+
     console.error('create-order protection failure', error);
     return jsonResponse(503, { error: 'Serviço temporariamente indisponível.' }, origin);
   }

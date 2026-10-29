@@ -17,6 +17,40 @@ const IMAGE_EXTENSIONS: Record<(typeof ALLOWED_IMAGE_TYPES)[number], string> = {
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UPLOAD_TOKEN_PATTERN = /^[0-9a-f]{64}$/;
+
+export const ORDER_IDEMPOTENCY_STORAGE_KEY = 'lscase:order-idempotency';
+
+type IdempotencyStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
+
+export function getOrCreateIdempotencyKey(
+  storage?: IdempotencyStorage | null,
+): string {
+  try {
+    const saved = storage?.getItem(ORDER_IDEMPOTENCY_STORAGE_KEY)?.trim();
+    if (saved && UUID_PATTERN.test(saved)) return saved;
+  } catch {
+    // Armazenamento indisponível; a chave ainda protege retries nesta montagem.
+  }
+
+  const key = crypto.randomUUID();
+
+  try {
+    storage?.setItem(ORDER_IDEMPOTENCY_STORAGE_KEY, key);
+  } catch {
+    // Sem persistência local; o envio atual continua funcionando.
+  }
+
+  return key;
+}
+
+export function clearIdempotencyKey(storage?: IdempotencyStorage | null): void {
+  try {
+    storage?.removeItem(ORDER_IDEMPOTENCY_STORAGE_KEY);
+  } catch {
+    // Sem persistência local não há nada a limpar.
+  }
+}
 
 export interface ImageLike {
   name: string;
@@ -61,6 +95,12 @@ export interface OrderSubmissionInput<TFile extends ImageLike> {
   notes: string;
   items: OrderItemPayload[];
   images: readonly TFile[];
+  idempotencyKey: string;
+}
+
+export interface CreatedOrder {
+  orderId: string;
+  uploadToken: string | null;
 }
 
 export interface OrderSubmissionDeps<TFile extends ImageLike> {
@@ -69,15 +109,18 @@ export interface OrderSubmissionDeps<TFile extends ImageLike> {
     customerContact: string;
     notes: string;
     items: OrderItemPayload[];
-  }) => Promise<string>;
+    idempotencyKey: string;
+  }) => Promise<CreatedOrder>;
   uploadImage: (path: string, file: TFile) => Promise<void>;
   attachImages: (orderId: string, images: OrderImagePayload[]) => Promise<void>;
-  makePath: (orderId: string, file: TFile) => string;
+  makePath: (orderId: string, uploadToken: string, file: TFile) => string;
+  releaseUploadToken?: (orderId: string, uploadToken: string) => Promise<void>;
   onProgress?: (current: number, total: number) => void;
 }
 
 export interface OrderSubmissionResult {
   orderId: string;
+  uploadToken: string | null;
   uploaded: OrderImagePayload[];
   failedImages: string[];
   attachError: string | null;
@@ -134,14 +177,20 @@ export function buildOrderItems(items: readonly RequestItem[]): OrderItemPayload
 
 export function createStoragePath(
   orderId: string,
+  uploadToken: string,
   file: Pick<ImageLike, 'type'>,
   fileId: string = crypto.randomUUID(),
 ): string {
   const normalizedOrderId = orderId.trim().toLowerCase();
+  const normalizedToken = uploadToken.trim().toLowerCase();
   const normalizedFileId = fileId.trim().toLowerCase();
 
   if (!UUID_PATTERN.test(normalizedOrderId)) {
     throw new Error('Identificador do pedido inválido.');
+  }
+
+  if (!UPLOAD_TOKEN_PATTERN.test(normalizedToken)) {
+    throw new Error('Autorização de upload inválida.');
   }
 
   if (!isAllowedImageType(file.type)) {
@@ -152,7 +201,7 @@ export function createStoragePath(
     throw new Error('Identificador do arquivo inválido.');
   }
 
-  return `orders/${normalizedOrderId}/${normalizedFileId}.${IMAGE_EXTENSIONS[file.type]}`;
+  return `orders/${normalizedOrderId}/${normalizedToken}/${normalizedFileId}.${IMAGE_EXTENSIONS[file.type]}`;
 }
 
 export function validateOrderForm(input: OrderFormInput): OrderFormErrors {
@@ -199,15 +248,28 @@ export async function submitOrder<TFile extends ImageLike>(
   input: OrderSubmissionInput<TFile>,
   deps: OrderSubmissionDeps<TFile>,
 ): Promise<OrderSubmissionResult> {
-  const orderId = await deps.createOrder({
+  const created = await deps.createOrder({
     customerName: input.customerName,
     customerContact: input.customerContact,
     notes: input.notes,
     items: input.items,
+    idempotencyKey: input.idempotencyKey,
   });
 
-  if (!orderId) {
+  if (!created?.orderId) {
     throw new Error('O servidor não retornou o código do pedido.');
+  }
+
+  const { orderId, uploadToken } = created;
+
+  if (input.images.length > 0 && !uploadToken) {
+    return {
+      orderId,
+      uploadToken: null,
+      uploaded: [],
+      failedImages: input.images.map((file) => file.name),
+      attachError: 'A autorização para enviar imagens expirou. Fale com o atendimento.',
+    };
   }
 
   const uploaded: OrderImagePayload[] = [];
@@ -218,7 +280,8 @@ export async function submitOrder<TFile extends ImageLike>(
     deps.onProgress?.(index + 1, input.images.length);
 
     try {
-      const path = deps.makePath(orderId, file);
+      if (!uploadToken) throw new Error('Token de upload ausente.');
+      const path = deps.makePath(orderId, uploadToken, file);
       await deps.uploadImage(path, file);
       uploaded.push({
         path,
@@ -241,8 +304,17 @@ export async function submitOrder<TFile extends ImageLike>(
     }
   }
 
+  if (uploadToken && failedImages.length === 0 && !attachError && deps.releaseUploadToken) {
+    try {
+      await deps.releaseUploadToken(orderId, uploadToken);
+    } catch {
+      // O token expira sozinho; não invalidar o pedido por causa da limpeza.
+    }
+  }
+
   return {
     orderId,
+    uploadToken,
     uploaded,
     failedImages,
     attachError,

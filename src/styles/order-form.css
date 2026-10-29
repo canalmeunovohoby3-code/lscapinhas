@@ -466,3 +466,44 @@
     width: 100%;
   }
 }
+
+/* Partial image upload recovery */
+.order-partial {
+  border-color: var(--orange-line);
+  background: var(--orange-soft);
+}
+
+.order-partial code {
+  color: var(--orange-dark);
+  font-size: 10.5px;
+  overflow-wrap: anywhere;
+}
+
+.order-partial-warning {
+  margin-top: 6px;
+  color: var(--danger);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.order-partial-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.order-partial-actions .btn {
+  min-height: 38px;
+  font-size: 11px;
+}
+
+@media (max-width: 600px) {
+  .order-partial-actions {
+    flex-direction: column;
+  }
+
+  .order-partial-actions .btn {
+    width: 100%;
+  }
+}

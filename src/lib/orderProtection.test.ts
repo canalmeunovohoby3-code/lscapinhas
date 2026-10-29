@@ -1,10 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   handleCreateOrder,
+  IdempotencyConflictError,
   type CreateOrderDeps,
 } from '../../supabase/functions/create-order/handler';
 
+const IDEMPOTENCY_KEY = '33333333-3333-4333-8333-333333333333';
+
 const validBody = {
+  idempotencyKey: IDEMPOTENCY_KEY,
   customerName: 'Ana',
   customerContact: '(24) 99999-9999',
   notes: 'Teste',
@@ -22,8 +26,12 @@ const validBody = {
 function makeDeps(overrides: Partial<CreateOrderDeps> = {}): CreateOrderDeps {
   return {
     allowedOrigin: 'https://lscapinhas.vercel.app',
+    getClientKey: vi.fn(async () => 'client-key'),
     consumeRateLimit: vi.fn(async () => true),
-    createOrder: vi.fn(async () => 'order-id'),
+    createOrder: vi.fn(async () => ({
+      orderId: 'order-id',
+      uploadToken: 'a'.repeat(64),
+    })),
     ...overrides,
   };
 }
@@ -51,27 +59,36 @@ describe('create-order sem Turnstile', () => {
     const response = await handleCreateOrder(createRequest(validBody), deps);
 
     expect(response.status).toBe(201);
-    await expect(response.json()).resolves.toEqual({ orderId: 'order-id' });
-    expect(deps.consumeRateLimit).toHaveBeenCalledTimes(1);
-    expect(deps.createOrder).toHaveBeenCalledTimes(1);
-    expect(deps.createOrder).toHaveBeenCalledWith({
-      customerName: 'Ana',
-      customerContact: '(24) 99999-9999',
-      notes: 'Teste',
-      items: [
-        {
-          brandId: 'apple',
-          brandName: 'Apple iPhone',
-          modelId: 'iphone-16',
-          modelName: 'iPhone 16',
-          quantity: 1,
-        },
-      ],
+    await expect(response.json()).resolves.toEqual({
+      orderId: 'order-id',
+      uploadToken: 'a'.repeat(64),
     });
+    expect(deps.consumeRateLimit).toHaveBeenCalledWith('client-key');
+    expect(deps.createOrder).toHaveBeenCalledTimes(1);
+    expect(deps.createOrder).toHaveBeenCalledWith(
+      {
+        customerName: 'Ana',
+        customerContact: '(24) 99999-9999',
+        notes: 'Teste',
+        items: [
+          {
+            brandId: 'apple',
+            brandName: 'Apple iPhone',
+            modelId: 'iphone-16',
+            modelName: 'iPhone 16',
+            quantity: 1,
+          },
+        ],
+      },
+      IDEMPOTENCY_KEY,
+    );
   });
 
-  it('bloqueia quando o rate limit global nega a requisição', async () => {
-    const create = vi.fn(async () => 'order-id');
+  it('bloqueia quando o rate limit nega a requisição', async () => {
+    const create = vi.fn(async () => ({
+      orderId: 'order-id',
+      uploadToken: 'a'.repeat(64),
+    }));
     const deps = makeDeps({
       consumeRateLimit: vi.fn(async () => false),
       createOrder: create,
@@ -80,7 +97,31 @@ describe('create-order sem Turnstile', () => {
     const response = await handleCreateOrder(createRequest(validBody), deps);
 
     expect(response.status).toBe(429);
+    expect(response.headers.get('retry-after')).toBe('60');
     expect(create).not.toHaveBeenCalled();
+  });
+
+  it('retorna 409 quando a mesma chave chega com conteúdo incompatível', async () => {
+    const deps = makeDeps({
+      createOrder: vi.fn(async () => {
+        throw new IdempotencyConflictError();
+      }),
+    });
+
+    const response = await handleCreateOrder(createRequest(validBody), deps);
+
+    expect(response.status).toBe(409);
+  });
+
+  it('rejeita requisição sem chave de idempotência', async () => {
+    const deps = makeDeps();
+    const bodyWithoutKey = { ...validBody, idempotencyKey: undefined };
+
+    const response = await handleCreateOrder(createRequest(bodyWithoutKey), deps);
+
+    expect(response.status).toBe(400);
+    expect(deps.consumeRateLimit).not.toHaveBeenCalled();
+    expect(deps.createOrder).not.toHaveBeenCalled();
   });
 
   it('rejeita dados obrigatórios ausentes antes de consumir rate limit', async () => {
@@ -171,7 +212,10 @@ describe('create-order sem Turnstile', () => {
   });
 
   it('retorna 503 se o rate limit falhar tecnicamente', async () => {
-    const create = vi.fn(async () => 'order-id');
+    const create = vi.fn(async () => ({
+      orderId: 'order-id',
+      uploadToken: 'a'.repeat(64),
+    }));
     const deps = makeDeps({
       consumeRateLimit: vi.fn(async () => {
         throw new Error('indisponível');

@@ -10,7 +10,9 @@ import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import {
   MAX_IMAGES,
   buildOrderItems,
+  clearIdempotencyKey,
   createStoragePath,
+  getOrCreateIdempotencyKey,
   submitOrder,
   validateOrderForm,
   validateOrderImages,
@@ -63,7 +65,11 @@ export function OrderForm({ onCompleted }: OrderFormProps) {
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
+  const [partialResult, setPartialResult] = useState<OrderSubmissionResult | null>(null);
   const submittingRef = useRef(false);
+  const [idempotencyKey] = useState(() => getOrCreateIdempotencyKey(
+    typeof window === 'undefined' ? null : window.sessionStorage,
+  ));
 
   const configError = !isSupabaseConfigured
     ? 'Integração Supabase não configurada. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.'
@@ -152,9 +158,13 @@ export function OrderForm({ onCompleted }: OrderFormProps) {
         ...trimmed,
         items,
         images: files,
+        idempotencyKey,
       }, {
         createOrder: async (payload) => {
-          const { data, error } = await client.functions.invoke<{ orderId?: string }>(
+          const { data, error } = await client.functions.invoke<{
+            orderId?: string;
+            uploadToken?: string | null;
+          }>(
             'create-order',
             { body: payload },
           );
@@ -167,7 +177,10 @@ export function OrderForm({ onCompleted }: OrderFormProps) {
             throw new Error('O servidor não retornou o código do pedido.');
           }
 
-          return data.orderId;
+          return {
+            orderId: data.orderId,
+            uploadToken: data.uploadToken ?? null,
+          };
         },
         uploadImage: async (path, file) => {
           const { error } = await client.storage
@@ -187,12 +200,30 @@ export function OrderForm({ onCompleted }: OrderFormProps) {
 
           if (error) throw error;
         },
-        makePath: createStoragePath,
+        makePath: (orderId, uploadToken, file) => (
+          createStoragePath(orderId, uploadToken, file)
+        ),
+        releaseUploadToken: async (orderId, uploadToken) => {
+          const { error } = await client.rpc('release_order_upload_token', {
+            p_order_id: orderId,
+            p_token: uploadToken,
+          });
+
+          if (error) throw error;
+        },
         onProgress: (current, total) => {
           setProgress(`Enviando imagem ${current} de ${total}...`);
         },
       });
 
+      if (result.failedImages.length > 0 || result.attachError) {
+        setPartialResult(result);
+        return;
+      }
+
+      clearIdempotencyKey(
+        typeof window === 'undefined' ? null : window.sessionStorage,
+      );
       onCompleted(result);
     } catch (error) {
       setFormError(await getFunctionErrorMessage(error));
@@ -201,6 +232,126 @@ export function OrderForm({ onCompleted }: OrderFormProps) {
       setSubmitting(false);
       setProgress(null);
     }
+  }
+
+  async function releaseUploadAuthorization(orderId: string, uploadToken: string) {
+    if (!supabase) return;
+
+    try {
+      await supabase.rpc('release_order_upload_token', {
+        p_order_id: orderId,
+        p_token: uploadToken,
+      });
+    } catch {
+      // O token também expira sozinho; não invalidar o pedido por essa limpeza.
+    }
+  }
+
+  async function retryPartialImages() {
+    const client = supabase;
+    const partial = partialResult;
+
+    if (!client || !partial || !partial.uploadToken || submittingRef.current) return;
+
+    submittingRef.current = true;
+    setSubmitting(true);
+    setProgress('Reenviando imagens pendentes...');
+
+    try {
+      let uploaded = [...partial.uploaded];
+      let failedImages = [...partial.failedImages];
+      let attachError = partial.attachError;
+
+      if (attachError && uploaded.length > 0) {
+        const { error } = await client.rpc('attach_order_images', {
+          p_order_id: partial.orderId,
+          p_images: uploaded,
+        });
+
+        if (error) throw error;
+        attachError = null;
+      }
+
+      const failedFiles = files.filter((file) => failedImages.includes(file.name));
+      const newUploads: typeof uploaded = [];
+
+      for (const file of failedFiles) {
+        const path = createStoragePath(partial.orderId, partial.uploadToken, file);
+
+        try {
+          const { error } = await client.storage
+            .from('order-images')
+            .upload(path, file, {
+              contentType: file.type,
+              upsert: false,
+            });
+
+          if (error) throw error;
+
+          newUploads.push({
+            path,
+            fileName: file.name,
+            contentType: file.type,
+            sizeBytes: file.size,
+          });
+          failedImages = failedImages.filter((name) => name !== file.name);
+        } catch {
+          // A imagem continua na lista de falhas para uma próxima tentativa.
+        }
+      }
+
+      if (newUploads.length > 0) {
+        const { error } = await client.rpc('attach_order_images', {
+          p_order_id: partial.orderId,
+          p_images: newUploads,
+        });
+
+        if (error) {
+          attachError = 'Algumas imagens foram enviadas, mas não puderam ser registradas.';
+        }
+      }
+
+      uploaded = [...uploaded, ...newUploads];
+
+      const next = {
+        ...partial,
+        uploaded,
+        failedImages,
+        attachError,
+      };
+
+      if (failedImages.length === 0 && !attachError) {
+        await releaseUploadAuthorization(partial.orderId, partial.uploadToken);
+        clearIdempotencyKey(
+          typeof window === 'undefined' ? null : window.sessionStorage,
+        );
+        setPartialResult(null);
+        onCompleted(next);
+      } else {
+        setPartialResult(next);
+      }
+    } catch (error) {
+      setFormError(await getFunctionErrorMessage(error));
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+      setProgress(null);
+    }
+  }
+
+  async function finishWithoutRetry() {
+    if (!partialResult || submitting) return;
+
+    if (partialResult.uploadToken) {
+      await releaseUploadAuthorization(partialResult.orderId, partialResult.uploadToken);
+    }
+
+    clearIdempotencyKey(
+      typeof window === 'undefined' ? null : window.sessionStorage,
+    );
+    const result = partialResult;
+    setPartialResult(null);
+    onCompleted(result);
   }
 
   return (
@@ -343,6 +494,46 @@ export function OrderForm({ onCompleted }: OrderFormProps) {
             )}
           </section>
 
+          {partialResult && (
+            <section className="order-form-card order-partial" aria-labelledby="order-partial-title">
+              <div className="order-form-section-head">
+                <h2 id="order-partial-title">Pedido criado — imagens pendentes</h2>
+                <p>
+                  O pedido <code>{partialResult.orderId}</code> foi registrado. Algumas
+                  imagens ainda precisam ser enviadas.
+                </p>
+              </div>
+
+              {partialResult.failedImages.length > 0 && (
+                <p className="order-partial-warning">
+                  Não foi possível enviar: {partialResult.failedImages.join(', ')}.
+                </p>
+              )}
+              {partialResult.attachError && (
+                <p className="order-partial-warning">{partialResult.attachError}</p>
+              )}
+
+              <div className="order-partial-actions">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => void retryPartialImages()}
+                  disabled={submitting}
+                >
+                  Tentar novamente imagens
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => void finishWithoutRetry()}
+                  disabled={submitting}
+                >
+                  Continuar sem reenviar
+                </button>
+              </div>
+            </section>
+          )}
+
           {configError && (
             <p className="order-form-notice" role="status">
               {configError}
@@ -358,7 +549,7 @@ export function OrderForm({ onCompleted }: OrderFormProps) {
           <button
             type="submit"
             className="btn btn-primary btn-block btn-large order-submit"
-            disabled={submitting || Boolean(configError)}
+            disabled={submitting || Boolean(configError) || Boolean(partialResult)}
             aria-busy={submitting}
           >
             {submitting ? progress ?? 'Enviando pedido...' : 'Enviar pedido'}
