@@ -13,6 +13,8 @@ const pairs = [
   ['admin dark muted-light', '#a0abad', '#1f2629'],
   ['admin dark accent', '#f0a071', '#14191b'],
   ['admin dark button', '#ffffff', '#a35a38'],
+  ['admin light numbers', '#232a2d', '#ffffff'],
+  ['admin dark numbers', '#f8f3ec', '#1f2629'],
 ];
 
 describe('contraste mínimo WCAG AA no painel', () => {

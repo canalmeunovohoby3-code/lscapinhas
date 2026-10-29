@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { MoonIcon, SunIcon } from '../components/Icons';
 import { useAdminAuth } from './AdminAuth';
 import { useAdminTheme } from './AdminTheme';
 
@@ -49,10 +50,12 @@ export function AdminLayout() {
             className="admin-theme-toggle"
             onClick={toggleTheme}
             aria-pressed={theme === 'dark'}
-            aria-label="Alternar tema do painel"
+            aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
+            title={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
           >
-            <span className="admin-theme-toggle-dot" aria-hidden="true" />
-            {theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
+            {theme === 'dark'
+              ? <MoonIcon width={18} height={18} />
+              : <SunIcon width={18} height={18} />}
           </button>
           <button type="button" className="admin-logout" onClick={handleLogout}>
             Sair
