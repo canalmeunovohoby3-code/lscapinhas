@@ -7,26 +7,18 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { CartItem, PhoneModel, Product, ProductVariant } from '../types/catalog';
+import type { PhoneModel, RequestItem } from '../types/catalog';
 import { catalog } from '../data/catalog';
+import { loadSelectedModel, saveSelectedModel } from '../lib/cart';
 import {
-  addItem,
-  cartTotals,
-  loadCartFromStorage,
-  loadSelectedModel,
-  removeItem,
-  resolveCart,
-  saveCartToStorage,
-  saveSelectedModel,
-  setItemQuantity,
-} from '../lib/cart';
-
-interface AddToCartInput {
-  product: Product;
-  model: PhoneModel | null;
-  variant: ProductVariant | null;
-  quantity: number;
-}
+  addRequestItem as addRequestItemToRequest,
+  loadRequest,
+  loadRequestNotes,
+  removeRequestItem as removeRequestItemFromRequest,
+  saveRequest,
+  saveRequestNotes,
+  updateRequestQuantity as updateRequestQuantityInRequest,
+} from '../lib/request';
 
 interface ToastState {
   id: number;
@@ -34,17 +26,17 @@ interface ToastState {
 }
 
 interface StoreContextValue {
-  cart: CartItem[];
-  resolvedCart: ReturnType<typeof resolveCart>;
-  totals: ReturnType<typeof cartTotals>;
-  cartCount: number;
+  requestItems: RequestItem[];
+  requestCount: number;
+  requestNotes: string;
+  setRequestNotes: (notes: string) => void;
+  addRequestItem: (modelId: string, quantity: number) => boolean;
+  updateRequestQuantity: (modelId: string, quantity: number) => void;
+  removeRequestItem: (modelId: string) => void;
+  clearRequest: () => void;
   selectedModelId: string | null;
   selectedModel: PhoneModel | undefined;
   setSelectedModel: (modelId: string | null) => void;
-  addToCart: (input: AddToCartInput) => boolean;
-  updateQuantity: (key: string, quantity: number) => void;
-  removeFromCart: (key: string) => void;
-  clearCart: () => void;
   toast: ToastState | null;
   notify: (message: string) => void;
   dismissToast: () => void;
@@ -53,15 +45,20 @@ interface StoreContextValue {
 const StoreContext = createContext<StoreContextValue | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>(() => loadCartFromStorage());
+  const [requestItems, setRequestItems] = useState<RequestItem[]>(() => loadRequest());
+  const [requestNotes, setRequestNotesState] = useState<string>(() => loadRequestNotes());
   const [selectedModelId, setSelectedModelIdState] = useState<string | null>(() =>
     loadSelectedModel(),
   );
   const [toast, setToast] = useState<ToastState | null>(null);
 
   useEffect(() => {
-    saveCartToStorage(cart);
-  }, [cart]);
+    saveRequest(requestItems);
+  }, [requestItems]);
+
+  useEffect(() => {
+    saveRequestNotes(requestNotes);
+  }, [requestNotes]);
 
   useEffect(() => {
     saveSelectedModel(selectedModelId);
@@ -84,46 +81,39 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setSelectedModelIdState(modelId);
   }, []);
 
-  const addToCart = useCallback(
-    ({ product, model, variant, quantity }: AddToCartInput): boolean => {
-      if (!product.available) return false;
-      if (product.variants.length > 0 && !variant) return false;
+  const addRequestItem = useCallback(
+    (modelId: string, quantity: number): boolean => {
+      const model = catalog.models.find((entry) => entry.id === modelId);
+      if (!model) return false;
       if (!Number.isFinite(quantity) || quantity < 1) return false;
 
-      const compatibleModel =
-        model && product.compatibleModels.includes(model.id) ? model : null;
-
-      setCart((current) =>
-        addItem(current, {
-          productId: product.id,
-          modelId: compatibleModel?.id ?? null,
-          variantId: variant?.id ?? null,
-          quantity,
-        }),
-      );
-      notify(`${product.name} foi adicionada ao carrinho.`);
+      setRequestItems((current) => addRequestItemToRequest(current, modelId, quantity));
+      notify(`${model.name} adicionado à solicitação.`);
       return true;
     },
     [notify],
   );
 
-  const updateQuantity = useCallback((key: string, quantity: number) => {
-    setCart((current) => setItemQuantity(current, key, quantity));
+  const updateRequestQuantity = useCallback((modelId: string, quantity: number) => {
+    setRequestItems((current) => updateRequestQuantityInRequest(current, modelId, quantity));
   }, []);
 
-  const removeFromCart = useCallback((key: string) => {
-    setCart((current) => removeItem(current, key));
+  const removeRequestItem = useCallback((modelId: string) => {
+    setRequestItems((current) => removeRequestItemFromRequest(current, modelId));
   }, []);
 
-  const clearCart = useCallback(() => {
-    setCart([]);
+  const clearRequest = useCallback(() => {
+    setRequestItems([]);
+    setRequestNotesState('');
   }, []);
 
-  const resolvedCart = useMemo(() => resolveCart(cart), [cart]);
-  const totals = useMemo(() => cartTotals(resolvedCart), [resolvedCart]);
-  const cartCount = useMemo(
-    () => cart.reduce((sum, item) => sum + item.quantity, 0),
-    [cart],
+  const setRequestNotes = useCallback((notes: string) => {
+    setRequestNotesState(notes);
+  }, []);
+
+  const requestCount = useMemo(
+    () => requestItems.reduce((sum, item) => sum + item.quantity, 0),
+    [requestItems],
   );
   const selectedModel = useMemo(
     () => catalog.models.find((model) => model.id === selectedModelId),
@@ -131,17 +121,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
 
   const value: StoreContextValue = {
-    cart,
-    resolvedCart,
-    totals,
-    cartCount,
+    requestItems,
+    requestCount,
+    requestNotes,
+    setRequestNotes,
+    addRequestItem,
+    updateRequestQuantity,
+    removeRequestItem,
+    clearRequest,
     selectedModelId,
     selectedModel,
     setSelectedModel,
-    addToCart,
-    updateQuantity,
-    removeFromCart,
-    clearCart,
     toast,
     notify,
     dismissToast,

@@ -4,7 +4,9 @@ dist
 *.local
 .env
 .env.*
+!.env.example
 *.log
 .kilo/
 .kilocode/
+supabase/.temp/
 public/*_tmp*

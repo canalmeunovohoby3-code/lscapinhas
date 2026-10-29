@@ -54,6 +54,11 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface RequestItem {
+  modelId: string;
+  quantity: number;
+}
+
 export interface ResolvedCartItem {
   key: string;
   item: CartItem;

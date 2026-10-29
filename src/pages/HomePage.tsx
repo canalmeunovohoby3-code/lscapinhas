@@ -1,155 +1,109 @@
-import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { HomeCarousel } from '../components/HomeCarousel';
-import { PhoneModelSelect } from '../components/PhoneModelSelect';
-import { ProductCard } from '../components/ProductCard';
-import { SearchIcon, SmartphoneIcon, WhatsAppIcon } from '../components/Icons';
-import { useStore } from '../context/StoreContext';
+import { ModelCardGrid } from '../components/ModelCardGrid';
+import { RequestBuilder } from '../components/RequestBuilder';
+import { ArrowRightIcon, BagIcon, SmartphoneIcon, WhatsAppIcon } from '../components/Icons';
 import { activeHomeBanners } from '../data/banners';
-import { filterProducts } from '../lib/filters';
-import { pluralize } from '../lib/format';
-import { buildWhatsAppUrl } from '../lib/whatsapp';
+import { getBrandById, getModelById } from '../data/catalog';
 import { site } from '../data/site';
 import { usePageMeta } from '../lib/usePageMeta';
 
-const PRODUCTS_PER_PAGE = 8;
+const FEATURED_MODEL_IDS = ['iphone-16', 'galaxy-s25', 'moto-g84', 'redmi-note-14'];
+const featuredModels = FEATURED_MODEL_IDS.flatMap((id) => {
+  const model = getModelById(id);
+  const brand = model ? getBrandById(model.brandId) : undefined;
+  return model && brand ? [{ brand, model }] : [];
+});
 
 export function HomePage() {
-  const { selectedModelId, selectedModel, setSelectedModel } = useStore();
-  const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
-
   usePageMeta(
-    `${site.fullName} | Capinhas para celular`,
-    'Catálogo de capinhas para celular. Escolha o modelo do seu aparelho, encontre as capinhas compatíveis e finalize o pedido pelo WhatsApp.',
+    `${site.fullName} | Capinhas personalizadas`,
+    'Escolha o modelo do seu celular e solicite uma capinha personalizada. Envie sua foto ou arte diretamente pelo WhatsApp.',
   );
-
-  useEffect(() => {
-    setVisibleCount(PRODUCTS_PER_PAGE);
-  }, [selectedModelId]);
-
-  const results = filterProducts({ modelId: selectedModelId });
-  const visibleProducts = results.slice(0, visibleCount);
-  const hasMore = results.length > visibleProducts.length;
-  const countLabel = `${results.length} ${pluralize(results.length, 'capinha', 'capinhas')}`;
 
   return (
     <div className="shop-home">
-      <h1 className="sr-only">Capinhas para o seu celular — LS Case by LS Celulares</h1>
+      <h1 className="sr-only">
+        Capinhas personalizadas para o seu celular — LS Case by LS Celulares
+      </h1>
 
       <HomeCarousel banners={activeHomeBanners} />
 
       <section className="home-selector" id="escolha-seu-celular">
         <div className="container">
-          <div className="phone-selector-panel">
-            <div className="phone-selector-heading">
-              <span className="phone-selector-icon" aria-hidden="true">
-                <SmartphoneIcon width={20} height={20} />
-              </span>
-              <div>
-                <h2>Escolha o modelo do seu celular</h2>
-                <p>Mostramos apenas as capinhas compatíveis com o aparelho selecionado.</p>
-              </div>
-              {selectedModel && (
-                <span className="selected-model-badge">{selectedModel.name}</span>
-              )}
-            </div>
-
-            <div className="home-model-row">
-              <PhoneModelSelect
-                selectedModelId={selectedModelId}
-                onSelect={(model) => setSelectedModel(model?.id ?? null)}
-                showClear={false}
-                idPrefix="home-model"
-              />
-              {selectedModel && (
-                <button
-                  type="button"
-                  className="model-select-clear home-model-clear"
-                  onClick={() => setSelectedModel(null)}
-                >
-                  Limpar filtros
-                </button>
-              )}
-            </div>
-          </div>
+          <RequestBuilder idPrefix="home-request" />
         </div>
       </section>
 
-      <section className="shop-catalog" aria-live="polite">
+      <section className="how-it-works">
         <div className="container">
-          <div className="shop-catalog-head">
-            <div>
-              <h2>
-                {selectedModel ? `Capinhas para ${selectedModel.name}` : 'Todas as capinhas'}
-              </h2>
-              <p>
-                {countLabel}
-                {selectedModel ? ' compatíveis com o seu aparelho' : ' disponíveis no catálogo'}
-              </p>
-            </div>
+          <div className="section-intro how-intro">
+            <p className="eyebrow">Como funciona</p>
+            <h2>Da escolha do modelo à sua arte no WhatsApp.</h2>
+            <p>
+              Sem cadastro e sem pagamento no site. Você escolhe o aparelho, informa a
+              quantidade e envia a imagem que deseja imprimir na conversa.
+            </p>
           </div>
 
-          {visibleProducts.length > 0 ? (
-            <>
-              <div className="product-grid product-grid--shop">
-                {visibleProducts.map((product, index) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    eager={index < 4}
-                    selectedModel={selectedModel ?? null}
-                    showFallbackModel={!selectedModel}
-                  />
-                ))}
+          <div className="how-grid">
+            <article className="how-step">
+              <div className="how-step-top">
+                <span className="how-step-icon" aria-hidden="true">
+                  <SmartphoneIcon width={20} height={20} />
+                </span>
+                <span className="how-step-number">01</span>
               </div>
+              <h3>Escolha o modelo</h3>
+              <p>Selecione a marca e o modelo exato do seu celular.</p>
+            </article>
 
-              {hasMore && (
-                <div className="shop-more">
-                  <button
-                    type="button"
-                    className="btn btn-outline"
-                    onClick={() => setVisibleCount((count) => count + PRODUCTS_PER_PAGE)}
-                  >
-                    Ver mais capinhas
-                  </button>
-                  <p>
-                    {visibleProducts.length} de {results.length} produtos exibidos
-                  </p>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="catalog-empty">
-              <span className="catalog-empty-icon" aria-hidden="true">
-                <SearchIcon width={24} height={24} />
-              </span>
-              <h2>Nenhuma capinha para este modelo</h2>
-              <p>
-                Ainda não há capinhas cadastradas para o{' '}
-                <strong>{selectedModel?.name ?? 'modelo selecionado'}</strong>. Você pode remover
-                o filtro para ver o catálogo completo ou consultar a loja.
-              </p>
-              <div className="catalog-empty-actions">
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={() => setSelectedModel(null)}
-                >
-                  Ver todas as capinhas
-                </button>
-                <a
-                  className="btn btn-primary"
-                  href={buildWhatsAppUrl(
-                    `Olá! Gostaria de saber se a LS Case tem capinhas para o ${selectedModel?.name ?? 'meu celular'}.`,
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <WhatsAppIcon width={17} height={17} />
-                  Consultar disponibilidade
-                </a>
+            <article className="how-step">
+              <div className="how-step-top">
+                <span className="how-step-icon" aria-hidden="true">
+                  <BagIcon width={20} height={20} />
+                </span>
+                <span className="how-step-number">02</span>
               </div>
+              <h3>Informe a quantidade</h3>
+              <p>Adicione uma ou mais capinhas à sua solicitação.</p>
+            </article>
+
+            <article className="how-step">
+              <div className="how-step-top">
+                <span className="how-step-icon" aria-hidden="true">
+                  <WhatsAppIcon width={20} height={20} />
+                </span>
+                <span className="how-step-number">03</span>
+              </div>
+              <h3>Envie sua arte</h3>
+              <p>
+                Finalize pelo WhatsApp e anexe a foto ou arte que deseja imprimir.
+              </p>
+            </article>
+          </div>
+
+          <p className="how-note">
+            O valor e as condições de pagamento são combinados diretamente no atendimento.
+          </p>
+        </div>
+      </section>
+
+      <section className="inspirations">
+        <div className="container">
+          <div className="inspirations-head">
+            <div>
+              <p className="eyebrow">Modelos em destaque</p>
+              <h2>Escolha o aparelho e personalize do seu jeito.</h2>
+              <p>Selecione um modelo e envie sua foto ou arte pelo WhatsApp.</p>
             </div>
-          )}
+            <Link to="/capinhas" className="inline-link">
+              Ver catálogo de modelos
+              <ArrowRightIcon width={15} height={15} />
+            </Link>
+          </div>
+
+          <ModelCardGrid entries={featuredModels} eagerCount={4} />
         </div>
       </section>
     </div>

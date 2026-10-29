@@ -1,0 +1,136 @@
+RELATORIO — ETAPA 1: INFRAESTRUTURA DE PEDIDOS PERSONALIZADOS
+================================================================
+
+1. AUDITORIA DO PROJETO ATUAL
+------------------------------
+- Framework: Vite 5 + React 18 + TypeScript.
+- Rotas: Home, /capinhas, /produto/:slug, /solicitacao, /carrinho, /contato e 404.
+- Catálogo: dados estáticos em src/data (marcas, modelos, capinhas, inspirações).
+- Fluxo atual: seleção de modelo no catálogo -> itens em localStorage
+  (lscase:request:v1) -> resumo -> mensagem para o WhatsApp comercial.
+- Não existe backend próprio, banco de dados, autenticação, storage de arquivos
+  ou integração Supabase.
+- Não existia .env no repositório; .gitignore já protege .env/.env.*.
+- Dependências: react, react-dom, react-router-dom, vite, vitest.
+- Testes: 64 aprovados em 8 arquivos.
+- Build: aprovado.
+- npm audit --omit=dev: 2 vulnerabilidades moderadas pré-existentes no
+  react-router 6.28 (correção exige React Router 7, mudança breaking). Não foi
+  alterado nesta etapa para não quebrar navegação/rotas.
+
+2. ARQUITETURA DESEJADA
+------------------------
+Site público (Vercel) -> Supabase (Postgres + Auth + Storage privado) ->
+painel administrativo protegido.
+
+Nesta etapa foi preparada somente a base:
+- cliente Supabase tipado;
+- tipos de pedidos;
+- migração SQL de tabelas, RLS, funções RPC e bucket privado;
+- documentação de configuração;
+- .env.example.
+
+A interface pública e o formulário atual NÃO foram alterados. Nenhum painel
+administrativo foi implementado.
+
+3. O QUE JÁ ESTÁ CONFIGURADO
+-----------------------------
+- Nenhum projeto Supabase remoto está vinculado a este repositório.
+- A migração SQL foi criada localmente, mas NÃO foi aplicada remotamente.
+- O cliente Supabase existe em src/lib/supabase.ts e usa apenas
+  VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.
+- O build funciona mesmo sem as variáveis, pois o cliente fica nulo até a
+  configuração ser preenchida.
+
+4. ESTRUTURA DE DADOS PROPOSTA
+------------------------------
+public.orders
+- id uuid pk
+- created_at, updated_at timestamptz
+- customer_name, customer_contact text
+- status order_status default 'novo'
+- notes text
+
+public.order_items
+- id uuid pk
+- order_id fk orders (cascade)
+- brand_id, brand_name, model_id, model_name text
+- quantity integer (1..99)
+- unique (order_id, model_id)
+
+public.order_images
+- id uuid pk
+- order_id fk orders (cascade)
+- order_item_id fk order_items (opcional, composta com order_id)
+- storage_path text unique
+- file_name, content_type, size_bytes
+- created_at
+
+public.admin_users
+- user_id uuid pk -> auth.users
+- created_at
+- allowlist de administradores
+
+Os preços não foram incluídos nesta etapa. As imagens ficam no Storage privado;
+o banco guarda apenas metadados e o caminho.
+
+5. SEGURANÇA E STORAGE
+----------------------
+- Bucket "order-images" privado (public = false), limite de 10 MB e MIME types
+  jpeg/png/webp.
+- Anon não lê nem grava diretamente nas tabelas.
+- Pedido público criado por RPC security definer: create_custom_order.
+- Caminhos de imagens registrados por RPC: attach_order_images.
+- Upload permitido apenas em orders/<order_id>/<arquivo> e apenas para pedidos
+  novos criados nas últimas 24h.
+- Leitura/exclusão do Storage apenas para admin autenticado e allowlisted.
+- RLS habilitado em todas as tabelas.
+- Admin allowlist: public.admin_users + public.is_admin() security definer.
+- Painel deverá usar URLs assinadas (createSignedUrl) para ver/baixar imagens.
+- service_role nunca no navegador, nunca em VITE_*; não foi adicionada ao código.
+- Nenhum usuário/senha administrativa foi criado ou commitado.
+
+6. ARQUIVOS CRIADOS/ALTERADOS
+-----------------------------
+Criados:
+- .env.example
+- src/vite-env.d.ts
+- src/lib/supabase.ts
+- src/types/orders.ts
+- supabase/migrations/20261028230000_custom_orders.sql
+- supabase/README.md
+- RELATORIO-ETAPA-1-PEDIDOS.txt
+
+Alterados:
+- .gitignore (exceção para manter .env.example versionado)
+- package.json / package-lock.json (@supabase/supabase-js)
+
+Nenhum componente visual, produto, imagem, rota pública ou fluxo de WhatsApp foi
+removido ou alterado.
+
+7. O QUE AINDA DEPENDE DE CONFIGURAÇÃO MANUAL
+---------------------------------------------
+1. Criar ou indicar o projeto Supabase do proprietário.
+2. Aplicar a migração no SQL Editor ou via Supabase CLI (db push).
+3. Desabilitar cadastros públicos em Authentication.
+4. Criar o usuário administrador no Auth e inserir o UUID em admin_users.
+5. Preencher VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY em .env.local.
+6. Configurar as mesmas variáveis na Vercel (Production/Preview/Development).
+7. Validar RLS, bucket privado e leitura autenticada.
+8. Não configurar service_role no frontend.
+
+8. TESTES EXECUTADOS
+--------------------
+- npm run build: aprovado.
+- npm test: 64 testes aprovados em 8 arquivos.
+- A migração SQL não foi executada neste ambiente por falta de projeto/credenciais
+  Supabase; portanto não foi validada contra um Postgres remoto.
+- Nenhum teste de upload/auth/painel foi executado porque essas etapas ainda não
+  foram implementadas, conforme o escopo desta etapa.
+
+9. PRÓXIMO PASSO RECOMENDADO
+----------------------------
+Etapa 2: implementar o formulário público de pedido com upload de imagens,
+usando create_custom_order, upload no bucket order-images e
+attach_order_images. Depois, na etapa seguinte, construir o painel protegido
+com Supabase Auth, listagem de pedidos e URLs assinadas.

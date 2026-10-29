@@ -1,96 +1,72 @@
 import { site } from '../data/site';
-import { formatBRL } from './format';
-
-export interface WhatsAppOrderItem {
-  name: string;
-  modelName: string | null;
-  variantName?: string | null;
-  quantity: number;
-  unitPrice: number;
-  subtotal: number;
-}
-
-export interface WhatsAppOrderInput {
-  orderId: string;
-  customerName: string;
-  notes?: string;
-  items: WhatsAppOrderItem[];
-  total: number;
-}
-
-export function buildOrderMessage({
-  orderId,
-  customerName,
-  notes,
-  items,
-  total,
-}: WhatsAppOrderInput): string {
-  const itemBlocks = items.map((item, index) => {
-    const variation = item.variantName ? ` — ${item.variantName}` : '';
-    const lines = [`${index + 1}. ${item.name}${variation}`];
-    if (item.modelName) lines.push(`Modelo do celular: ${item.modelName}`);
-    lines.push(
-      `Quantidade: ${item.quantity}`,
-      `Valor unitário: ${formatBRL(item.unitPrice)}`,
-      `Subtotal: ${formatBRL(item.subtotal)}`,
-    );
-    return lines.join('\n');
-  });
-
-  const blocks = [
-    `Olá! Quero fazer um pedido na ${site.fullName}.`,
-    '*RESUMO DO PEDIDO*',
-    `Pedido: #${orderId}`,
-    itemBlocks.join('\n\n'),
-    `*TOTAL DO PEDIDO: ${formatBRL(total)}*`,
-    `Cliente: ${customerName.trim()}`,
-  ];
-
-  if (notes?.trim()) {
-    blocks.push(`Observações: ${notes.trim()}`);
-  }
-
-  blocks.push(
-    'Gostaria de confirmar a disponibilidade dos produtos e combinar a forma de pagamento e entrega.',
-  );
-
-  return blocks.join('\n\n');
-}
 
 export function buildWhatsAppUrl(message: string): string {
   return `https://wa.me/${site.whatsapp.number}?text=${encodeURIComponent(message)}`;
 }
 
-export function buildOrderWhatsAppUrl(input: WhatsAppOrderInput): string {
-  return buildWhatsAppUrl(buildOrderMessage(input));
-}
-
-export function buildProductInquiryMessage(input: {
-  productName: string;
-  modelName?: string | null;
-  variantName?: string | null;
+export interface CustomRequestItem {
+  brandName: string;
+  modelName: string;
   quantity: number;
-  price: number;
-  productUrl?: string;
-}): string {
-  const lines = [
-    'Olá! Tenho interesse nesta capinha:',
-    '',
-    `*${input.productName}*`,
-  ];
-  if (input.modelName) lines.push(`Modelo do celular: ${input.modelName}`);
-  if (input.variantName) lines.push(`Variação: ${input.variantName}`);
-  lines.push(`Quantidade: ${input.quantity}`);
-  lines.push(`Valor: ${formatBRL(input.price)}`);
-  if (input.productUrl) lines.push(`Link: ${input.productUrl}`);
-  lines.push('', 'Poderia me ajudar com a disponibilidade?');
-  return lines.join('\n');
 }
 
-export function buildProductInquiryUrl(
-  input: Parameters<typeof buildProductInquiryMessage>[0],
-): string {
-  return buildWhatsAppUrl(buildProductInquiryMessage(input));
+export interface CustomRequestInput {
+  items: CustomRequestItem[];
+  notes?: string;
+}
+
+export function buildCustomRequestMessage({ items, notes }: CustomRequestInput): string {
+  const validItems = items.filter(
+    (item) =>
+      item.brandName.trim().length > 0 &&
+      item.modelName.trim().length > 0 &&
+      Number.isInteger(item.quantity) &&
+      item.quantity > 0,
+  );
+  const totalUnits = validItems.reduce((sum, item) => sum + item.quantity, 0);
+  const plural = validItems.length > 1 || totalUnits > 1;
+
+  const lines = [
+    `Olá! Gostaria de solicitar ${plural ? 'capinhas personalizadas' : 'uma capinha personalizada'}.`,
+    '',
+  ];
+
+  validItems.forEach((item, index) => {
+    if (validItems.length > 1) {
+      lines.push(
+        `${index + 1}. Marca do celular: ${item.brandName.trim()}`,
+        `   Modelo do aparelho: ${item.modelName.trim()}`,
+        `   Quantidade: ${item.quantity}`,
+        '',
+      );
+    } else {
+      lines.push(
+        `Marca do celular: ${item.brandName.trim()}`,
+        `Modelo do aparelho: ${item.modelName.trim()}`,
+        `Quantidade: ${item.quantity}`,
+        '',
+      );
+    }
+  });
+
+  if (notes?.trim()) {
+    lines.push(`Observações: ${notes.trim()}`, '');
+  }
+
+  lines.push(
+    plural
+      ? 'Vou enviar as fotos ou artes que desejo utilizar para personalizar as capinhas aqui nesta conversa.'
+      : 'Vou enviar a foto ou arte que desejo utilizar para personalizar a capinha aqui nesta conversa.',
+    'Gostaria de confirmar o valor e as condições de pagamento.',
+    '',
+    'Obrigado!',
+  );
+
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+export function buildCustomRequestWhatsAppUrl(input: CustomRequestInput): string {
+  return buildWhatsAppUrl(buildCustomRequestMessage(input));
 }
 
 export function buildGeneralMessage(): string {

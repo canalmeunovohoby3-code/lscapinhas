@@ -37,7 +37,7 @@ export function Footer() {
             <Link to="/">Início</Link>
             <Link to="/capinhas">Capinhas</Link>
             <Link to="/contato">Contato</Link>
-            <Link to="/carrinho">Carrinho</Link>
+            <Link to="/solicitacao">Solicitação</Link>
           </nav>
 
           <div className="footer-column">

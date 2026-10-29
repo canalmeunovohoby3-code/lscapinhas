@@ -1,92 +1,59 @@
 ﻿import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ProductCard } from '../components/ProductCard';
-import { QuantityStepper } from '../components/QuantityStepper';
-import {
-  ArrowRightIcon,
-  ChevronDownIcon,
-  SmartphoneIcon,
-  WhatsAppIcon,
-} from '../components/Icons';
+import { InspirationCard } from '../components/InspirationCard';
+import { ArrowRightIcon, ChevronDownIcon, SmartphoneIcon, WhatsAppIcon } from '../components/Icons';
 import { useStore } from '../context/StoreContext';
-import { catalog, getProductBySlug } from '../data/catalog';
-import { discountPercent, formatBRL } from '../lib/format';
-import { resolveProductModel } from '../lib/productModel';
-import { buildProductInquiryUrl, buildWhatsAppUrl } from '../lib/whatsapp';
+import { catalog, getModelById, getProductBySlug } from '../data/catalog';
+import { buildWhatsAppUrl } from '../lib/whatsapp';
 import { usePageMeta } from '../lib/usePageMeta';
 
 export function ProductPage() {
   const { slug = '' } = useParams();
   const [searchParams] = useSearchParams();
   const product = getProductBySlug(slug);
-  const { selectedModel, addToCart } = useStore();
+  const { selectedModelId } = useStore();
 
   const [imageIndex, setImageIndex] = useState(0);
-  const [quantity, setQuantity] = useState(1);
-  const [error, setError] = useState('');
 
   usePageMeta(
     product
-      ? `${product.name} | LS Case by LS Celulares`
-      : 'Produto não encontrado | LS Case by LS Celulares',
+      ? `Inspiração: ${product.name} | LS Case by LS Celulares`
+      : 'Inspiração não encontrada | LS Case by LS Celulares',
     product?.description,
   );
 
   useEffect(() => {
     setImageIndex(0);
-    setQuantity(1);
-    setError('');
   }, [product]);
 
   if (!product) {
     return (
       <div className="container not-found">
-        <p className="eyebrow">Capinha não encontrada</p>
-        <h1>Esta capinha não está mais no catálogo.</h1>
-        <p>Explore as opções disponíveis para o seu modelo.</p>
+        <p className="eyebrow">Inspiração não encontrada</p>
+        <h1>Esta estampa não está mais disponível.</h1>
+        <p>Explore o catálogo e monte uma capinha com a sua própria arte.</p>
         <Link to="/capinhas" className="btn btn-primary">
-          Ver capinhas
+          Ver catálogo de modelos
           <ArrowRightIcon width={17} height={17} />
         </Link>
       </div>
     );
   }
 
-  const currentProduct = product;
-  const urlModelId = searchParams.get('modelo');
-  const productModel = resolveProductModel(currentProduct, urlModelId, {
-    fallbackModelId: selectedModel?.id ?? null,
-    allowDefault: true,
-  });
-  const selectedVariant = currentProduct.variants[0] ?? null;
-  const discount = discountPercent(currentProduct.price, currentProduct.originalPrice);
+  const requestedModel = getModelById(searchParams.get('modelo'));
+  const selectedModel = requestedModel ?? getModelById(selectedModelId);
+  const requestHref = selectedModel
+    ? `/capinhas?modelo=${encodeURIComponent(selectedModel.id)}`
+    : '/capinhas';
+  const inquiryUrl = buildWhatsAppUrl(
+    `Olá! Vi a inspiração "${product.name}"${
+      selectedModel ? ` para o ${selectedModel.name}` : ''
+    } e gostaria de solicitar uma capinha personalizada. Poderia me ajudar?`,
+  );
   const related = catalog.products
-    .filter((entry) => entry.id !== currentProduct.id)
-    .filter((entry) => !selectedModel || entry.compatibleModels.includes(selectedModel.id))
-    .filter((entry) => entry.category === currentProduct.category || entry.featured)
+    .filter((entry) => entry.id !== product.id)
+    .filter((entry) => entry.category === product.category || entry.featured)
     .slice(0, 4);
-
-  const inquiryUrl = buildProductInquiryUrl({
-    productName: currentProduct.name,
-    modelName: productModel?.name ?? null,
-    quantity,
-    price: currentProduct.price,
-    productUrl: typeof window !== 'undefined' ? window.location.href : undefined,
-  });
-
-  function handleAdd() {
-    const added = addToCart({
-      product: currentProduct,
-      model: productModel,
-      variant: selectedVariant,
-      quantity,
-    });
-    if (!added) {
-      setError('Não foi possível adicionar esta capinha. Confira as opções.');
-      return;
-    }
-    setError('');
-  }
 
   return (
     <div className="product-page">
@@ -96,30 +63,29 @@ export function ProductPage() {
           <span>/</span>
           <Link to="/capinhas">Capinhas</Link>
           <span>/</span>
-          <span aria-current="page">{currentProduct.name}</span>
+          <span aria-current="page">{product.name}</span>
         </nav>
 
         <div className="product-layout">
           <div className="product-gallery">
             <div className="product-main-image">
               <img
-                src={currentProduct.images[imageIndex]}
-                alt={`${currentProduct.name} — imagem ${imageIndex + 1}`}
+                src={product.images[imageIndex]}
+                alt={`${product.name} — imagem ${imageIndex + 1}`}
                 width={900}
                 height={1100}
                 loading="eager"
               />
-              {discount !== null && <span className="product-discount">-{discount}%</span>}
             </div>
-            {currentProduct.images.length > 1 && (
+            {product.images.length > 1 && (
               <div className="product-thumbs" role="group" aria-label="Galeria de imagens">
-                {currentProduct.images.map((image, index) => (
+                {product.images.map((image, index) => (
                   <button
                     key={image}
                     type="button"
                     className={`product-thumb${index === imageIndex ? ' is-active' : ''}`}
                     onClick={() => setImageIndex(index)}
-                    aria-label={`Ver imagem ${index + 1} de ${currentProduct.name}`}
+                    aria-label={`Ver imagem ${index + 1} de ${product.name}`}
                     aria-pressed={index === imageIndex}
                   >
                     <img
@@ -137,84 +103,64 @@ export function ProductPage() {
           </div>
 
           <div className="product-info">
-            <h1>{currentProduct.name}</h1>
+            <p className="eyebrow">Inspiração</p>
+            <h1>{product.name}</h1>
 
-            <div className="product-price-row">
-              <span className="product-price">{formatBRL(currentProduct.price)}</span>
-              {currentProduct.originalPrice && (
-                <s className="product-price-old">{formatBRL(currentProduct.originalPrice)}</s>
-              )}
-              {discount !== null && <span className="product-price-tag">-{discount}%</span>}
-            </div>
+            <p className="product-description">{product.description}</p>
 
-            <p className="product-description">{currentProduct.description}</p>
+            <p className="product-inspiration-note">
+              Esta é uma estampa de exemplo. A sua foto ou arte será enviada por você no
+              formulário de pedido do site.
+            </p>
 
-            {!currentProduct.available && (
-              <p className="product-unavailable" role="alert">
-                Esta capinha está indisponível no momento. Fale com a loja para saber sobre novas
-                reposições.
+            {selectedModel ? (
+              <div className="product-field">
+                <div className="product-model-display">
+                  <SmartphoneIcon width={18} height={18} />
+                  <span className="model-field-copy">
+                    <span className="model-field-label">Modelo do celular</span>
+                    <strong>{selectedModel.name}</strong>
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <p className="product-inspiration-model-hint">
+                Escolha o modelo do seu celular na próxima etapa.
               </p>
             )}
 
-            <div className="product-form">
-              {productModel && (
-                <div className="product-field">
-                  <div className="product-model-display">
-                    <SmartphoneIcon width={18} height={18} />
-                    <span className="model-field-copy">
-                      <span className="model-field-label">Modelo do celular</span>
-                      <strong>{productModel.name}</strong>
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              <div className="product-buy-row">
-                <div>
-                  <span className="field-label">Quantidade</span>
-                  <QuantityStepper value={quantity} onChange={setQuantity} />
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-primary product-add"
-                  onClick={handleAdd}
-                  disabled={!currentProduct.available}
-                >
-                  Adicionar ao carrinho
-                </button>
-              </div>
-
-              {error && (
-                <p className="form-error" role="alert">
-                  {error}
-                </p>
-              )}
-
+            <div className="product-request-actions">
+              <Link to={requestHref} className="btn btn-primary btn-large btn-block">
+                Solicitar capinha personalizada
+                <ArrowRightIcon width={17} height={17} />
+              </Link>
               <a
-                className="btn btn-outline btn-block product-whatsapp"
                 href={inquiryUrl}
+                className="btn btn-outline btn-block"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <WhatsAppIcon width={18} height={18} />
-                Comprar pelo WhatsApp
+                Falar sobre esta inspiração
               </a>
               <p className="product-whatsapp-note">
-                O botão abre uma conversa com a loja para confirmar disponibilidade e detalhes.
+                O valor e as condições de pagamento são combinados pelo WhatsApp.
               </p>
             </div>
 
             <div className="product-accordions">
               <details className="product-accordion">
                 <summary>
-                  Como comprar
+                  Como funciona
                   <ChevronDownIcon width={16} height={16} />
                 </summary>
                 <div className="product-accordion-body">
                   <ol className="how-to-buy">
-                    <li>Escolha o modelo do celular e a variação.</li>
-                    <li>Adicione a capinha ao carrinho e ajuste a quantidade.</li>
-                    <li>Informe seu nome e finalize o pedido pelo WhatsApp.</li>
+                    <li>Escolha a marca e o modelo exato do seu celular.</li>
+                    <li>Adicione a quantidade à solicitação e escreva suas observações.</li>
+                    <li>
+                      Finalize o pedido pelo site e anexe a foto ou arte que deseja imprimir.
+                    </li>
                   </ol>
                 </div>
               </details>
@@ -222,7 +168,7 @@ export function ProductPage() {
 
             <Link to="/contato" className="product-contact-link">
               <SmartphoneIcon width={16} height={16} />
-              Dúvidas sobre compatibilidade? Fale com a loja
+              Dúvidas sobre o seu modelo? Fale com a loja
             </Link>
           </div>
         </div>
@@ -231,19 +177,18 @@ export function ProductPage() {
       <section className="section related-products">
         <div className="container">
           <div className="related-head">
-            <h2>Você também pode gostar</h2>
+            <h2>Outras inspirações</h2>
             <Link to="/capinhas" className="inline-link">
-              Ver todas as capinhas
+              Ver catálogo de modelos
               <ArrowRightIcon width={15} height={15} />
             </Link>
           </div>
           <div className="product-grid product-grid--shop">
             {related.map((entry) => (
-              <ProductCard
+              <InspirationCard
                 key={entry.id}
                 product={entry}
-                selectedModel={selectedModel ?? null}
-                showFallbackModel={!selectedModel}
+                modelId={selectedModel?.id ?? null}
               />
             ))}
           </div>
@@ -255,7 +200,9 @@ export function ProductPage() {
           <p>
             Precisa de ajuda para escolher?{' '}
             <a
-              href={buildWhatsAppUrl(`Olá! Tenho uma dúvida sobre a capinha ${currentProduct.name}.`)}
+              href={buildWhatsAppUrl(
+                `Olá! Tenho uma dúvida sobre a inspiração ${product.name}.`,
+              )}
               target="_blank"
               rel="noopener noreferrer"
             >

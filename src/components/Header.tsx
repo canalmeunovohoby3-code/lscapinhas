@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
+import { catalog } from '../data/catalog';
 import { site } from '../data/site';
 import { buildGeneralWhatsAppUrl } from '../lib/whatsapp';
 import { BrandLogo } from './BrandLogo';
@@ -13,8 +14,15 @@ const navLinks = [
   { to: '/contato', label: 'Contato' },
 ];
 
+function normalize(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
 export function Header() {
-  const { cartCount } = useStore();
+  const { requestCount, setSelectedModel } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -39,7 +47,33 @@ export function Header() {
   function submitSearch(event: FormEvent) {
     event.preventDefault();
     const query = term.trim();
-    navigate(query ? `/capinhas?q=${encodeURIComponent(query)}` : '/capinhas');
+    if (!query) {
+      navigate('/capinhas');
+      setSearchOpen(false);
+      return;
+    }
+
+    const normalizedQuery = normalize(query);
+    const exactMatch = catalog.models.find(
+      (model) => normalize(model.name) === normalizedQuery,
+    );
+    const modelMatch =
+      exactMatch ??
+      catalog.models.find((model) => normalize(model.name).includes(normalizedQuery));
+    const brandMatch = catalog.brands.find(
+      (brand) =>
+        normalize(brand.name).includes(normalizedQuery) ||
+        normalize(brand.shortName).includes(normalizedQuery),
+    );
+
+    if (modelMatch) {
+      setSelectedModel(modelMatch.id);
+      navigate(`/capinhas?modelo=${encodeURIComponent(modelMatch.id)}`);
+    } else if (brandMatch) {
+      navigate(`/capinhas?marca=${encodeURIComponent(brandMatch.id)}`);
+    } else {
+      navigate(`/capinhas?q=${encodeURIComponent(query)}`);
+    }
     setSearchOpen(false);
   }
 
@@ -68,8 +102,8 @@ export function Header() {
                 type="search"
                 value={term}
                 onChange={(event) => setTerm(event.target.value)}
-                placeholder="Buscar capinha ou modelo"
-                aria-label="Buscar capinhas ou modelos de celular"
+                placeholder="Buscar modelo ou marca"
+                aria-label="Buscar modelo ou marca"
               />
             </form>
 
@@ -96,13 +130,15 @@ export function Header() {
               </a>
 
               <Link
-                to="/carrinho"
+                to="/solicitacao"
                 className="header-cart"
-                aria-label={`Carrinho com ${cartCount} ${cartCount === 1 ? 'item' : 'itens'}`}
+                aria-label={`Solicitação com ${requestCount} ${
+                  requestCount === 1 ? 'capinha' : 'capinhas'
+                }`}
               >
                 <BagIcon width={19} height={19} />
-                <span className="header-cart-label">Carrinho</span>
-                {cartCount > 0 && <span className="header-cart-count">{cartCount}</span>}
+                <span className="header-cart-label">Solicitação</span>
+                {requestCount > 0 && <span className="header-cart-count">{requestCount}</span>}
               </Link>
             </div>
           </div>
@@ -144,8 +180,8 @@ export function Header() {
                 type="search"
                 value={term}
                 onChange={(event) => setTerm(event.target.value)}
-                placeholder="Buscar capinha ou modelo"
-                aria-label="Buscar capinhas ou modelos de celular"
+                placeholder="Buscar modelo ou marca"
+                aria-label="Buscar modelo ou marca"
                 autoFocus
               />
               <button type="submit" className="btn btn-primary btn-small">

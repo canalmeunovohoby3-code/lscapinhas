@@ -124,6 +124,38 @@
   line-height: 1.7;
 }
 
+.product-inspiration-note {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--brown-line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.product-inspiration-model-hint {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.product-request-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 22px;
+}
+
+.product-request-actions .btn {
+  width: 100%;
+}
+
+.product-request-actions .product-whatsapp-note {
+  margin-top: 0;
+}
+
 .product-unavailable {
   margin-top: 14px;
   padding: 11px 13px;

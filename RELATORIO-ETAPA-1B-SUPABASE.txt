@@ -1,0 +1,127 @@
+RELATORIO — ETAPA 1B: CONFIGURACAO SUPABASE
+============================================
+
+Projeto alvo:
+https://owqaotnqpkuyngmtyolp.supabase.co
+
+STATUS DA APLICACAO REMOTA
+--------------------------
+A migracao NAO foi aplicada remotamente nesta execucao.
+
+Motivo:
+- A CLI Supabase deste ambiente esta autenticada em outra conta/projeto e
+  `supabase projects list` nao lista o projeto owqaotnqpkuyngmtyolp.
+- Nao foi feito logout nem troca de conta.
+- Nao havia .env.local/.env com VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY.
+- Nao foi solicitado nem usado token, senha, cookie ou service_role.
+- O endpoint do projeto responde (404 na raiz e 401 na API REST sem chave),
+  confirmando que a URL esta ativa, mas isso nao aplica a migracao.
+
+A migracao foi revisada e corrigida localmente, mas nao foi executada contra
+Postgres/Supabase real. Portanto, tabelas, funcoes, policies e bucket ainda NAO
+estao confirmados no projeto remoto.
+
+
+ARQUIVOS AUDITADOS
+------------------
+- supabase/migrations/20261028230000_custom_orders.sql
+- supabase/README.md
+- src/lib/supabase.ts
+- src/types/orders.ts
+- .env.example
+- package.json
+- .gitignore
+- estado atual do repositorio (alteracoes existentes preservadas)
+
+O site publico, catalogo, imagens, layout, filtros, solicitacao atual e WhatsApp
+nao foram alterados nesta etapa.
+
+
+CORRECOES APLICADAS NA MIGRACAO
+-------------------------------
+1. `jsonb_array_elements` passou a usar explicitamente a coluna `value`
+   (`select value ...` / `as item(value)`), evitando ambiguidade/erro de
+   referencia ao usar o alias da funcao como se fosse uma coluna.
+2. O caminho da imagem passou a ser validado por regex ancorada:
+   `orders/<uuid>/<arquivo-permitido>`, sem wildcard `%` ou `_` que pudesse
+   aceitar caminhos manipulados.
+3. A tabela `order_images` ganhou CHECK de `storage_path` coerente com esse
+   formato.
+4. `can_upload_order_image` usa CASE para so converter o UUID depois de validar
+   o formato completo do caminho. Isso evita erro de CAST em caminhos
+   maliciosos.
+5. A funcao `attach_order_images` valida o item vinculado ao pedido e o path
+   exato antes de inserir.
+6. `SECURITY DEFINER` mantem `search_path = public, pg_temp` (ou public) e as
+   funcoes sao revogadas de PUBLIC e concedidas somente a anon/authenticated
+   quando fazem parte do fluxo publico.
+7. Permanecem:
+   - RLS em orders, order_items, order_images e admin_users.
+   - Leitura de pedidos/itens/imagens somente para admin autenticado e
+     allowlisted em admin_users.
+   - Nenhum SELECT/INSERT/UPDATE/DELETE direto para anon nas tabelas.
+   - RPC create_custom_order e attach_order_images como unica entrada publica.
+   - Bucket order-images privado, 10 MB, JPEG/PNG/WebP.
+   - Upload apenas em orders/<pedido>/<arquivo> para pedido novo de ate 24h.
+   - Leitura/exclusao do Storage somente por admin.
+   - service_role fora do frontend e de VITE_*.
+8. Nenhum usuario administrativo ou senha foi criado/inventado.
+
+
+PENDENCIAS EXTERNAS (ACAO DO PROPRIETARIO)
+------------------------------------------
+1. Entrar no painel Supabase com a conta proprietaria de
+   owqaotnqpkuyngmtyolp.
+2. Abrir SQL Editor, colar integralmente o conteudo de:
+   supabase/migrations/20261028230000_custom_orders.sql
+   e executar.
+   Alternativa via CLI, autenticada na conta correta:
+     supabase login
+     supabase link --project-ref owqaotnqpkuyngmtyolp
+     supabase db push
+   A CLI pode solicitar a senha do banco; nao envie essa senha pelo chat.
+3. Verificar no SQL Editor:
+   - tabelas orders, order_items, order_images e admin_users existem;
+   - RLS habilitado nas quatro;
+   - funcoes create_custom_order, attach_order_images, is_admin e
+     can_upload_order_image existem com SECURITY DEFINER onde previsto;
+   - policies de tabela e de storage existem;
+   - bucket order-images esta com public = false, limite 10 MB e MIME types
+     image/jpeg, image/png e image/webp.
+4. Authentication > Providers: desabilitar cadastros publicos.
+5. Authentication > Users: criar o usuario do proprietario e confirmar o e-mail.
+6. SQL Editor: inserir o UUID do usuario em public.admin_users.
+   Nao ha senha no codigo.
+7. Project Settings > API: obter URL e anon public key.
+8. Criar .env.local (nao versionado) com:
+   VITE_SUPABASE_URL=https://owqaotnqpkuyngmtyolp.supabase.co
+   VITE_SUPABASE_ANON_KEY=<anon-public-key>
+   Nao usar service_role em VITE_*.
+9. Configurar as duas variaveis na Vercel (Production, Preview e Development).
+10. Validar com a anon key que SELECT em orders/itens/imagens e negado, e que
+    upload/leitura sem pedido/admin nao funciona.
+
+
+VALIDACAO LOCAL EXECUTADA
+-------------------------
+- npm run build: aprovado.
+- npm test: 64 testes aprovados em 8 arquivos.
+- Nenhum teste de migracao remota, Auth, upload ou painel foi executado, pois
+  essas operacoes dependem da conta/projeto Supabase e da aplicacao manual da
+  migracao.
+- A migracao SQL nao foi aplicada nem validada contra Postgres remoto.
+
+
+PROXIMO PASSO
+-------------
+Depois que a migracao for aplicada e as variaveis forem configuradas, o proximo
+passo e implementar o formulario publico de upload:
+
+1. Chamar create_custom_order para criar o pedido.
+2. Enviar imagens para o bucket privado order-images em
+   orders/<order_id>/<uuid>.<ext>.
+3. Chamar attach_order_images com os caminhos enviados.
+4. Depois, implementar o painel admin com Supabase Auth, listagem de pedidos e
+   URLs assinadas.
+
+Nenhum push/deploy foi realizado nesta etapa.

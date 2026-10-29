@@ -18,7 +18,7 @@ export function MobileMenu({
   open: boolean;
   onClose: () => void;
 }) {
-  const { cartCount, selectedModel } = useStore();
+  const { requestCount, selectedModel } = useStore();
 
   return (
     <Modal
@@ -45,7 +45,7 @@ export function MobileMenu({
       <div className="mobile-menu-divider" />
 
       {selectedModel && (
-        <Link to="/#escolha-seu-celular" className="mobile-model" onClick={onClose}>
+        <Link to="/capinhas" className="mobile-model" onClick={onClose}>
           <SmartphoneIcon width={18} height={18} />
           <span>
             Seu aparelho
@@ -55,10 +55,10 @@ export function MobileMenu({
         </Link>
       )}
 
-      <Link to="/carrinho" className="mobile-cart-link" onClick={onClose}>
+      <Link to="/solicitacao" className="mobile-cart-link" onClick={onClose}>
         <BagIcon width={18} height={18} />
-        Carrinho
-        {cartCount > 0 && <span className="mobile-cart-count">{cartCount}</span>}
+        Solicitação
+        {requestCount > 0 && <span className="mobile-cart-count">{requestCount}</span>}
       </Link>
 
       <a

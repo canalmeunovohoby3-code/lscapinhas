@@ -315,6 +315,63 @@
     justify-content: center;
   }
 
+  .request-model-row {
+    flex-wrap: wrap;
+  }
+
+  .request-clear {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .request-action-row {
+    flex-wrap: wrap;
+  }
+
+  .request-qty {
+    width: 100%;
+  }
+
+  .request-add {
+    width: 100%;
+  }
+
+  .request-builder-helper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .how-it-works {
+    padding: 48px 0 42px;
+  }
+
+  .how-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .how-step {
+    padding: 18px;
+  }
+
+  .inspirations {
+    padding: 48px 0 56px;
+  }
+
+  .inspirations-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .inspiration-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .request-current {
+    padding: 20px 0 4px;
+  }
+
   .shop-catalog {
     padding: 20px 0 56px;
   }

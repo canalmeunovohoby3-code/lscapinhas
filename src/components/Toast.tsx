@@ -3,7 +3,7 @@ import { useStore } from '../context/StoreContext';
 import { CheckIcon, CloseIcon } from './Icons';
 
 export function Toast() {
-  const { toast, dismissToast, cartCount } = useStore();
+  const { toast, dismissToast, requestCount } = useStore();
 
   if (!toast) return null;
 
@@ -13,9 +13,9 @@ export function Toast() {
         <CheckIcon width={16} height={16} />
       </span>
       <span className="toast-message">{toast.message}</span>
-      {cartCount > 0 && (
-        <Link to="/carrinho" className="toast-link" onClick={dismissToast}>
-          Ver carrinho
+      {requestCount > 0 && (
+        <Link to="/solicitacao" className="toast-link" onClick={dismissToast}>
+          Ver solicitação
         </Link>
       )}
       <button type="button" className="toast-close" onClick={dismissToast} aria-label="Fechar aviso">
