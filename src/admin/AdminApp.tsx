@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { ScrollToTop } from '../components/ScrollToTop';
 import '../styles/admin.css';
 import { AdminAuthProvider } from './AdminAuth';
+import { AdminCatalogImagesPage } from './AdminCatalogImagesPage';
 import { AdminDashboard } from './AdminDashboard';
 import { AdminGuard } from './AdminGuard';
 import { AdminLogin } from './AdminLogin';
@@ -18,6 +19,7 @@ export function AdminApp() {
           <Route index element={<AdminDashboard />} />
           <Route path="pedidos" element={<AdminOrdersPage />} />
           <Route path="pedidos/:orderId" element={<AdminOrderDetailPage />} />
+          <Route path="catalogo" element={<AdminCatalogImagesPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>

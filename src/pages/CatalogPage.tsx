@@ -41,7 +41,7 @@ export function CatalogPage() {
 
   usePageMeta(
     'Catálogo de aparelhos | LS Case by LS Celulares',
-    'Escolha a marca e o modelo do seu celular para solicitar uma capinha personalizada pelo WhatsApp.',
+    'Escolha a marca e o modelo do seu celular para solicitar uma capinha personalizada pelo site.',
   );
 
   const models = useMemo(() => {
@@ -191,7 +191,7 @@ export function CatalogPage() {
               <h2>Estampas para inspirar a sua arte.</h2>
               <p>
                 Os modelos abaixo são apenas exemplos. A sua foto ou arte é enviada pelo
-                WhatsApp.
+                formulário do site.
               </p>
             </div>
             <a href="#modelos" className="inline-link">

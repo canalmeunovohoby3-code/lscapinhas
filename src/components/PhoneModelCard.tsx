@@ -1,6 +1,5 @@
 import type { PhoneBrand, PhoneModel } from '../types/catalog';
 import { getModelIllustration } from '../lib/modelImage';
-import { buildCustomRequestWhatsAppUrl } from '../lib/whatsapp';
 import { CheckIcon, PlusIcon } from './Icons';
 
 export function PhoneModelCard({
@@ -9,6 +8,7 @@ export function PhoneModelCard({
   selected,
   inRequest,
   eager = false,
+  images,
   onRequest,
 }: {
   brand: PhoneBrand;
@@ -16,18 +16,12 @@ export function PhoneModelCard({
   selected: boolean;
   inRequest: boolean;
   eager?: boolean;
+  images?: readonly string[];
   onRequest: () => void;
 }) {
-  const { image, hoverImage } = getModelIllustration(model);
-  const requestUrl = buildCustomRequestWhatsAppUrl({
-    items: [
-      {
-        brandName: brand.shortName,
-        modelName: model.name,
-        quantity: 1,
-      },
-    ],
-  });
+  const illustration = getModelIllustration(model);
+  const image = images?.[0] ?? illustration.image;
+  const hoverImage = images?.[1] ?? images?.[0] ?? illustration.hoverImage;
 
   return (
     <article
@@ -39,7 +33,7 @@ export function PhoneModelCard({
         <img
           className="product-card-image"
           src={image}
-          alt={`Exemplo de capinha personalizada para ${model.name}`}
+          alt={`Foto de capinha para ${model.name}`}
           width={900}
           height={1100}
           loading={eager ? 'eager' : 'lazy'}
@@ -80,17 +74,15 @@ export function PhoneModelCard({
             Ver na solicitação
           </button>
         ) : (
-          <a
-            href={requestUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
             className="btn btn-primary btn-block model-card-action"
             onClick={onRequest}
             aria-label={`Solicitar capinha personalizada para ${model.name}`}
           >
             <PlusIcon width={15} height={15} />
             Solicitar capinha
-          </a>
+          </button>
         )}
       </div>
     </article>

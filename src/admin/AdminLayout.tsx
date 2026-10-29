@@ -32,6 +32,12 @@ export function AdminLayout() {
           >
             Pedidos
           </NavLink>
+          <NavLink
+            to="/admin/catalogo"
+            className={({ isActive }) => `admin-nav-link${isActive ? ' is-active' : ''}`}
+          >
+            Fotos do catálogo
+          </NavLink>
         </nav>
 
         <div className="admin-sidebar-footer">

@@ -22,6 +22,7 @@ const publicOrderFlow = [
   'src/components/OrderForm.tsx',
   'src/components/RequestSummary.tsx',
   'src/pages/CartPage.tsx',
+  'src/components/PhoneModelCard.tsx',
 ];
 
 const priceFreeFlow = [
@@ -35,6 +36,8 @@ const priceFreeFlow = [
   'src/admin/AdminDashboard.tsx',
   'src/admin/AdminOrdersPage.tsx',
   'src/admin/AdminOrderDetailPage.tsx',
+  'src/admin/AdminCatalogImagesPage.tsx',
+  'src/admin/catalogImageFiles.ts',
   'src/admin/AdminLogin.tsx',
   'src/admin/AdminLayout.tsx',
   'src/admin/AdminStates.tsx',

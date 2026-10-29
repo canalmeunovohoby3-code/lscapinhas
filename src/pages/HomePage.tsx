@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { HomeCarousel } from '../components/HomeCarousel';
 import { ModelCardGrid } from '../components/ModelCardGrid';
 import { RequestBuilder } from '../components/RequestBuilder';
-import { ArrowRightIcon, BagIcon, SmartphoneIcon, WhatsAppIcon } from '../components/Icons';
+import { ArrowRightIcon, BagIcon, SmartphoneIcon } from '../components/Icons';
 import { activeHomeBanners } from '../data/banners';
 import { getBrandById, getModelById } from '../data/catalog';
 import { site } from '../data/site';
@@ -18,7 +18,7 @@ const featuredModels = FEATURED_MODEL_IDS.flatMap((id) => {
 export function HomePage() {
   usePageMeta(
     `${site.fullName} | Capinhas personalizadas`,
-    'Escolha o modelo do seu celular e solicite uma capinha personalizada. Envie sua foto ou arte diretamente pelo WhatsApp.',
+    'Escolha o modelo do seu celular e solicite uma capinha personalizada. Envie sua foto ou arte pelo formulário do site.',
   );
 
   return (
@@ -39,10 +39,10 @@ export function HomePage() {
         <div className="container">
           <div className="section-intro how-intro">
             <p className="eyebrow">Como funciona</p>
-            <h2>Da escolha do modelo à sua arte no WhatsApp.</h2>
+            <h2>Da escolha do modelo à sua arte no pedido.</h2>
             <p>
               Sem cadastro e sem pagamento no site. Você escolhe o aparelho, informa a
-              quantidade e envia a imagem que deseja imprimir na conversa.
+              quantidade e envia a imagem que deseja imprimir pelo formulário.
             </p>
           </div>
 
@@ -72,13 +72,13 @@ export function HomePage() {
             <article className="how-step">
               <div className="how-step-top">
                 <span className="how-step-icon" aria-hidden="true">
-                  <WhatsAppIcon width={20} height={20} />
+                  <ArrowRightIcon width={20} height={20} />
                 </span>
                 <span className="how-step-number">03</span>
               </div>
               <h3>Envie sua arte</h3>
               <p>
-                Finalize pelo WhatsApp e anexe a foto ou arte que deseja imprimir.
+                Finalize pelo site e anexe a foto ou arte que deseja imprimir.
               </p>
             </article>
           </div>
@@ -95,7 +95,7 @@ export function HomePage() {
             <div>
               <p className="eyebrow">Modelos em destaque</p>
               <h2>Escolha o aparelho e personalize do seu jeito.</h2>
-              <p>Selecione um modelo e envie sua foto ou arte pelo WhatsApp.</p>
+              <p>Selecione um modelo e envie sua foto ou arte pelo formulário do site.</p>
             </div>
             <Link to="/capinhas" className="inline-link">
               Ver catálogo de modelos
