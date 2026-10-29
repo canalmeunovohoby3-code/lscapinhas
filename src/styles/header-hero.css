@@ -58,7 +58,7 @@
   padding: 0 14px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: var(--white);
+  background: var(--card-bg);
   color: var(--muted);
   transition:
     border-color var(--transition),
@@ -150,7 +150,7 @@
 
 .header-cart:hover {
   border-color: rgba(255, 255, 255, 0.3);
-  background: var(--white);
+  background: var(--card-bg);
   color: var(--ink);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
@@ -287,7 +287,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   outline: none;
-  background: var(--white);
+  background: var(--card-bg);
   color: var(--ink);
   font-size: 13px;
   transition: border-color var(--transition), box-shadow var(--transition);
@@ -399,4 +399,36 @@
   color: var(--muted);
   font-size: 11.5px;
   text-align: center;
+}
+
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--header-line-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--header-text);
+  transition:
+    background-color var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+}
+
+.theme-toggle:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--header-hover);
+  color: var(--white);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--orange-light);
+  outline-offset: 2px;
+}
+
+.theme-toggle[aria-pressed='true'] {
+  background: var(--header-hover);
 }
