@@ -5,6 +5,7 @@ import {
   useState,
   type ChangeEvent,
 } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CheckIcon, PlusIcon, TrashIcon } from '../components/Icons';
 import { catalog } from '../data/catalog';
 import {
@@ -19,6 +20,13 @@ import {
   createCatalogImagePath,
   validateCatalogImageFiles,
 } from './catalogImageFiles';
+import {
+  findCatalogSelection,
+  groupCatalogImages,
+  resolveInitialCatalogSelection,
+  type CatalogImageSummary,
+  type CatalogSelection,
+} from './catalogSelection';
 
 interface Replacement {
   image: CatalogModelImage;
@@ -26,13 +34,50 @@ interface Replacement {
   preview: string;
 }
 
+function CatalogImagePreview({ src, alt }: { src: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  if (failed) {
+    return (
+      <div className="admin-image-error" role="alert">
+        <span>Não foi possível carregar a imagem.</span>
+        <button
+          type="button"
+          className="admin-catalog-action"
+          onClick={() => {
+            setFailed(false);
+            setAttempt((current) => current + 1);
+          }}
+        >
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      key={attempt}
+      src={src}
+      alt={alt}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 export function AdminCatalogImagesPage() {
   usePageMeta('Fotos do catálogo | Admin LS Case');
 
-  const firstBrand = catalog.brands[0];
-  const [brandId, setBrandId] = useState(firstBrand?.id ?? '');
-  const [modelId, setModelId] = useState(firstBrand?.models[0]?.id ?? '');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialSelection = findCatalogSelection(
+    searchParams.get('marca'),
+    searchParams.get('modelo'),
+  );
+  const [brandId, setBrandId] = useState(initialSelection.brandId);
+  const [modelId, setModelId] = useState(initialSelection.modelId);
   const [images, setImages] = useState<CatalogModelImage[]>([]);
+  const [summaries, setSummaries] = useState<CatalogImageSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,10 +134,43 @@ export function AdminCatalogImagesPage() {
     void loadImages();
   }, [loadImages]);
 
-  function handleBrandChange(nextBrandId: string) {
-    const nextBrand = catalog.brands.find((entry) => entry.id === nextBrandId);
-    setBrandId(nextBrandId);
-    setModelId(nextBrand?.models[0]?.id ?? '');
+  const loadSummaries = useCallback(async () => {
+    if (!supabase) return;
+
+    const { data, error: summaryError } = await supabase
+      .from('catalog_model_images')
+      .select('brand_id, model_id, storage_path, sort_order')
+      .order('sort_order', { ascending: true });
+
+    if (summaryError) return;
+
+    setSummaries(groupCatalogImages(data ?? []));
+  }, []);
+
+  useEffect(() => {
+    void loadSummaries();
+  }, [loadSummaries]);
+
+  useEffect(() => {
+    if (summaries.length === 0) return;
+    if (searchParams.get('marca') || searchParams.get('modelo')) return;
+
+    const first = resolveInitialCatalogSelection(null, null, summaries);
+    setBrandId(first.brandId);
+    setModelId(first.modelId);
+    setSearchParams(
+      { marca: first.brandId, modelo: first.modelId },
+      { replace: true },
+    );
+  }, [searchParams, setSearchParams, summaries]);
+
+  function applySelection(next: CatalogSelection) {
+    setBrandId(next.brandId);
+    setModelId(next.modelId);
+    setSearchParams(
+      { marca: next.brandId, modelo: next.modelId },
+      { replace: true },
+    );
     setPendingFiles([]);
     setFileError(null);
     setReplacement(null);
@@ -101,14 +179,12 @@ export function AdminCatalogImagesPage() {
     setError(null);
   }
 
+  function handleBrandChange(nextBrandId: string) {
+    applySelection(findCatalogSelection(nextBrandId, null));
+  }
+
   function handleModelChange(nextModelId: string) {
-    setModelId(nextModelId);
-    setPendingFiles([]);
-    setFileError(null);
-    setReplacement(null);
-    setReplacementError(null);
-    setNotice(null);
-    setError(null);
+    applySelection(findCatalogSelection(brandId, nextModelId));
   }
 
   function handlePendingFiles(event: ChangeEvent<HTMLInputElement>) {
@@ -182,7 +258,7 @@ export function AdminCatalogImagesPage() {
 
       setPendingFiles([]);
       setNotice(`${rows.length} foto(s) adicionada(s) ao modelo ${model.name}.`);
-      await loadImages();
+      await Promise.all([loadImages(), loadSummaries()]);
     } catch {
       if (uploadedPaths.length > 0) {
         await supabase.storage.from(CATALOG_IMAGE_BUCKET).remove(uploadedPaths);
@@ -216,7 +292,7 @@ export function AdminCatalogImagesPage() {
       if (deleteError) throw deleteError;
 
       setNotice('Foto removida.');
-      await loadImages();
+      await Promise.all([loadImages(), loadSummaries()]);
     } catch {
       setError('Não foi possível remover a foto. Tente novamente.');
     } finally {
@@ -301,7 +377,7 @@ export function AdminCatalogImagesPage() {
       }
 
       setReplacement(null);
-      await loadImages();
+      await Promise.all([loadImages(), loadSummaries()]);
     } catch {
       if (newPath) {
         await supabase.storage.from(CATALOG_IMAGE_BUCKET).remove([newPath]);
@@ -321,6 +397,44 @@ export function AdminCatalogImagesPage() {
           <p>Gerencie as imagens de capinhas exibidas no catálogo público.</p>
         </div>
       </div>
+
+      {summaries.length > 0 && (
+        <section className="admin-card admin-catalog-summary" aria-labelledby="catalog-summary-title">
+          <div className="admin-card-head">
+            <div>
+              <h2 id="catalog-summary-title">Modelos com fotos</h2>
+              <p>Abra um modelo abaixo para visualizar, substituir ou remover as fotos.</p>
+            </div>
+          </div>
+
+          <div className="admin-catalog-summary-grid">
+            {summaries.map((entry) => {
+              const previewUrl = getCatalogImageUrl(entry.previewPath);
+              const isActive = entry.brandId === brandId && entry.modelId === modelId;
+
+              return (
+                <button
+                  key={`${entry.brandId}/${entry.modelId}`}
+                  type="button"
+                  className={`admin-catalog-summary-item${isActive ? ' is-active' : ''}`}
+                  onClick={() => applySelection(entry)}
+                >
+                  <span className="admin-catalog-summary-thumb">
+                    {previewUrl
+                      ? <CatalogImagePreview src={previewUrl} alt={entry.modelName} />
+                      : <span className="admin-catalog-summary-no-image">Sem prévia</span>}
+                  </span>
+                  <span className="admin-catalog-summary-copy">
+                    <strong>{entry.brandName}</strong>
+                    <span>{entry.modelName}</span>
+                  </span>
+                  <span className="admin-catalog-summary-count">{entry.count}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <section className="admin-card admin-catalog-selector" aria-labelledby="catalog-model-title">
         <div className="admin-card-head">
@@ -399,7 +513,10 @@ export function AdminCatalogImagesPage() {
                       <span>Prévia da substituição</span>
                     </div>
                   ) : imageUrl ? (
-                    <img src={imageUrl} alt={image.alt_text ?? `Foto de ${model?.name ?? 'modelo'}`} />
+                    <CatalogImagePreview
+                      src={imageUrl}
+                      alt={image.alt_text ?? `Foto de ${model?.name ?? 'modelo'}`}
+                    />
                   ) : (
                     <div className="admin-image-error" role="alert">Imagem indisponível.</div>
                   )}
