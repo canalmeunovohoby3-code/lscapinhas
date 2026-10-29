@@ -23,6 +23,7 @@
 .admin-brand {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 3px;
   padding: 0 10px 22px;
   border-bottom: 1px solid var(--header-line);
@@ -1582,9 +1583,12 @@
   }
 }
 .admin-brand .brand-logo {
+  align-self: flex-start;
+  flex: 0 0 auto;
   width: auto;
   height: 56px;
   max-width: 100%;
+  object-fit: contain;
 }
 
 .admin-login-brand {
@@ -1595,9 +1599,12 @@
 }
 
 .admin-login-brand .brand-logo {
+  align-self: flex-start;
+  flex: 0 0 auto;
   width: auto;
   height: 54px;
   max-width: 100%;
+  object-fit: contain;
 }
 
 .admin-login-brand span {
