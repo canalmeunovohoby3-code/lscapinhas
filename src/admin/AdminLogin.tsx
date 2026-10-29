@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { BrandLogo } from '../components/BrandLogo';
 import { ArrowRightIcon, ShieldIcon } from '../components/Icons';
 import { usePageMeta } from '../lib/usePageMeta';
 import { useAdminAuth } from './AdminAuth';
@@ -43,7 +44,7 @@ export function AdminLogin() {
     <div className="admin-login-page">
       <div className="admin-login-card">
         <div className="admin-login-brand">
-          <strong>LS CASE</strong>
+          <BrandLogo light eager />
           <span>Painel administrativo</span>
         </div>
 

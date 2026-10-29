@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { BrandLogo } from '../components/BrandLogo';
 import { MoonIcon, SunIcon } from '../components/Icons';
 import { useAdminAuth } from './AdminAuth';
 import { useAdminTheme } from './AdminTheme';
@@ -16,8 +17,8 @@ export function AdminLayout() {
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <Link to="/admin" className="admin-brand">
-          <strong>LS CASE</strong>
+        <Link to="/admin" className="admin-brand" aria-label="LS Case — painel administrativo">
+          <BrandLogo light eager />
           <span>Painel administrativo</span>
         </Link>
 
@@ -68,7 +69,7 @@ export function AdminLayout() {
 
       <div className="admin-body">
         <header className="admin-topbar">
-          <span>LS Case · Gestão de pedidos</span>
+          <span>Painel administrativo · Gestão de pedidos</span>
           <button type="button" className="admin-logout admin-logout--topbar" onClick={handleLogout}>
             Sair
           </button>
