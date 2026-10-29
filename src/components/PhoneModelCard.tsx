@@ -21,7 +21,6 @@ export function PhoneModelCard({
 }) {
   const illustration = getModelIllustration(model);
   const image = images?.[0] ?? illustration.image;
-  const hoverImage = images?.[1] ?? images?.[0] ?? illustration.hoverImage;
 
   return (
     <article
@@ -34,18 +33,7 @@ export function PhoneModelCard({
           className="product-card-image"
           src={image}
           alt={`Foto de capinha para ${model.name}`}
-          width={900}
-          height={1100}
           loading={eager ? 'eager' : 'lazy'}
-        />
-        <img
-          className="product-card-image product-card-image--hover"
-          src={hoverImage}
-          alt=""
-          width={900}
-          height={1100}
-          loading="lazy"
-          aria-hidden="true"
         />
       </div>
 

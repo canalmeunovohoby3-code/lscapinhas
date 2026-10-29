@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowRightIcon, WhatsAppIcon } from '../components/Icons';
 import { supabase } from '../lib/supabase';
 import { usePageMeta } from '../lib/usePageMeta';
@@ -16,12 +16,16 @@ import { buildAdminWhatsAppUrl } from './whatsapp';
 export function AdminOrderDetailPage() {
   usePageMeta('Detalhes do pedido | Admin LS Case');
   const { orderId = '' } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState<AdminOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusSaving, setStatusSaving] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [imageErrors, setImageErrors] = useState<Record<string, string>>({});
 
@@ -118,6 +122,44 @@ export function AdminOrderDetailPage() {
       : current);
     setStatusNotice('Situação atualizada com sucesso.');
     setStatusSaving(false);
+  }
+
+  async function deleteOrder() {
+    if (!supabase || !order || deleting) return;
+
+    setDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const { data, error: deleteOrderError } = await supabase.rpc('admin_delete_order', {
+        p_order_id: order.id,
+      });
+
+      if (deleteOrderError) throw deleteOrderError;
+      if (data !== true) throw new Error('Pedido não encontrado.');
+
+      const paths = (order.order_images ?? []).map((image) => image.storage_path);
+      let storageWarning = false;
+
+      if (paths.length > 0) {
+        const { error: storageError } = await supabase.storage
+          .from('order-images')
+          .remove(paths);
+        storageWarning = Boolean(storageError);
+      }
+
+      navigate('/admin/pedidos', {
+        replace: true,
+        state: {
+          adminNotice: storageWarning
+            ? 'Pedido excluído, mas algumas imagens não puderam ser removidas do Storage.'
+            : 'Pedido excluído.',
+        },
+      });
+    } catch {
+      setDeleteError('Não foi possível excluir o pedido. Tente novamente.');
+      setDeleting(false);
+    }
   }
 
   if (loading) {
@@ -324,6 +366,54 @@ export function AdminOrderDetailPage() {
                 );
               })}
             </div>
+          )}
+        </section>
+
+        <section className="admin-card admin-card--wide admin-danger-zone" aria-labelledby="admin-delete-title">
+          <div className="admin-card-head">
+            <div>
+              <h2 id="admin-delete-title">Excluir pedido</h2>
+              <p>Esta ação remove o pedido, os itens e as referências de imagens.</p>
+            </div>
+          </div>
+
+          {!confirmDelete ? (
+            <button
+              type="button"
+              className="admin-danger-button"
+              onClick={() => setConfirmDelete(true)}
+              disabled={deleting}
+            >
+              Excluir este pedido
+            </button>
+          ) : (
+            <div className="admin-confirm-delete" role="alertdialog" aria-labelledby="admin-confirm-delete-title">
+              <p id="admin-confirm-delete-title">
+                Tem certeza? O pedido e seus dados serão removidos permanentemente.
+              </p>
+              <div className="admin-confirm-delete-actions">
+                <button
+                  type="button"
+                  className="admin-danger-button"
+                  onClick={() => void deleteOrder()}
+                  disabled={deleting}
+                >
+                  {deleting ? 'Excluindo...' : 'Confirmar exclusão'}
+                </button>
+                <button
+                  type="button"
+                  className="admin-button-secondary"
+                  onClick={() => setConfirmDelete(false)}
+                  disabled={deleting}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {deleteError && (
+            <p className="admin-alert admin-alert--error" role="alert">{deleteError}</p>
           )}
         </section>
       </div>

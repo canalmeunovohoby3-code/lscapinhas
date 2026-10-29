@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowRightIcon } from '../components/Icons';
 import { supabase } from '../lib/supabase';
 import { usePageMeta } from '../lib/usePageMeta';
@@ -17,7 +17,12 @@ const UUID_PATTERN =
 
 export function AdminOrdersPage() {
   usePageMeta('Pedidos | Admin LS Case');
+  const location = useLocation();
   const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [notice] = useState<string | null>(() => {
+    const state = location.state as { adminNotice?: string } | null;
+    return state?.adminNotice ?? null;
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState('');
@@ -162,6 +167,12 @@ export function AdminOrdersPage() {
       {error && (
         <div className="admin-alert admin-alert--error" role="alert">
           {error}
+        </div>
+      )}
+
+      {notice && (
+        <div className="admin-alert admin-alert--success" role="status">
+          {notice}
         </div>
       )}
 

@@ -310,36 +310,21 @@
 
 .product-card-media {
   position: relative;
-  aspect-ratio: 9 / 11;
   overflow: hidden;
-  background: var(--surface-warm);
+  background: transparent;
 }
 
 .product-card-media > a {
   display: block;
   width: 100%;
-  height: 100%;
 }
 
 .product-card-image {
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 320ms cubic-bezier(0.2, 0.7, 0.3, 1), opacity var(--transition);
-}
-
-.product-card-image--hover {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-}
-
-.product-card:hover .product-card-image {
-  transform: scale(1.012);
-}
-
-.product-card:hover .product-card-image--hover {
-  opacity: 1;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
 }
 
 .product-card-discount,

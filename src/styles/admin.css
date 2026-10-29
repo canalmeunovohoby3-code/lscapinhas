@@ -1207,3 +1207,189 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Admin theme */
+.admin-theme {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.admin-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--header-text);
+  cursor: pointer;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.admin-theme-toggle:hover {
+  color: var(--orange-light);
+}
+
+.admin-theme-toggle-dot {
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--header-muted);
+  border-radius: 50%;
+  background: transparent;
+}
+
+.admin-theme-toggle[aria-pressed='true'] .admin-theme-toggle-dot {
+  border-color: var(--orange-light);
+  background: var(--orange);
+}
+
+.admin-theme--dark {
+  --cream: #14191b;
+  --white: #1f2629;
+  --surface: #252d30;
+  --surface-warm: #2c3538;
+  --ink: #f1ece5;
+  --ink-soft: #d6d0c8;
+  --muted: #adb6b7;
+  --muted-light: #8e999b;
+  --line: #364044;
+  --line-soft: #2d3639;
+  --line-strong: #4a5558;
+  --header-bg: #0e1315;
+  --header-text: #f1ece5;
+  --header-muted: #9fa9aa;
+  --header-line: #283235;
+  --header-hover: #222b2e;
+  --orange-soft: #3a2b25;
+  --orange-line: #654635;
+  --orange-dark: #efad88;
+  --danger-soft: #3a2524;
+  --danger: #ffb6aa;
+}
+
+.admin-theme--dark .admin-topbar {
+  background: rgba(15, 20, 22, 0.86);
+}
+
+.admin-theme--dark .admin-login-page {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(199, 93, 41, 0.12), transparent 35%),
+    var(--cream);
+}
+
+.admin-theme--dark .admin-login-card {
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+.admin-theme--dark .admin-alert--success {
+  border-color: rgba(123, 199, 159, 0.2);
+  background: #1c3327;
+  color: #a8dfbd;
+}
+
+.admin-theme--dark .admin-catalog-action--confirm {
+  border-color: rgba(123, 199, 159, 0.22);
+  background: #1c3327;
+  color: #a8dfbd;
+}
+
+.admin-theme--dark .admin-whatsapp-button--disabled {
+  background: var(--surface-warm);
+  color: var(--muted);
+}
+
+.admin-theme--dark .admin-status-em_analise {
+  background: #26363d;
+  color: #a9c8d7;
+}
+
+.admin-theme--dark .admin-status-em_producao {
+  background: #3a3022;
+  color: #e1bf7c;
+}
+
+.admin-theme--dark .admin-status-pronto,
+.admin-theme--dark .admin-status-concluido {
+  background: #1e382a;
+  color: #a8dfbd;
+}
+
+.admin-theme--dark .admin-status-cancelado {
+  background: #3a2524;
+  color: #ffb6aa;
+}
+
+@media (max-width: 860px) {
+  .admin-theme-toggle {
+    order: 2;
+  }
+}
+
+/* Admin destructive action */
+.admin-danger-zone {
+  border-color: rgba(163, 59, 28, 0.25);
+}
+
+.admin-danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(163, 59, 28, 0.3);
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
+.admin-danger-button:hover {
+  border-color: var(--danger);
+}
+
+.admin-danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.admin-confirm-delete {
+  padding: 12px;
+  border: 1px solid rgba(163, 59, 28, 0.25);
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+}
+
+.admin-confirm-delete > p {
+  color: var(--danger);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.admin-confirm-delete-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 11px;
+}
+
+.admin-theme--dark .admin-danger-zone {
+  border-color: rgba(255, 182, 170, 0.25);
+}
+
+.admin-theme--dark .admin-danger-button {
+  border-color: rgba(255, 182, 170, 0.3);
+  background: #3a2524;
+  color: #ffb6aa;
+}
+
+.admin-theme--dark .admin-confirm-delete {
+  border-color: rgba(255, 182, 170, 0.25);
+  background: #3a2524;
+}
+
+.admin-theme--dark .admin-confirm-delete > p {
+  color: #ffb6aa;
+}

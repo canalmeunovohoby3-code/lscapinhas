@@ -1,8 +1,10 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from './AdminAuth';
+import { useAdminTheme } from './AdminTheme';
 
 export function AdminLayout() {
   const { session, signOut } = useAdminAuth();
+  const { theme, toggleTheme } = useAdminTheme();
   const navigate = useNavigate();
 
   async function handleLogout() {
@@ -42,6 +44,16 @@ export function AdminLayout() {
 
         <div className="admin-sidebar-footer">
           <span className="admin-user-email">{session?.user.email}</span>
+          <button
+            type="button"
+            className="admin-theme-toggle"
+            onClick={toggleTheme}
+            aria-pressed={theme === 'dark'}
+            aria-label="Alternar tema do painel"
+          >
+            <span className="admin-theme-toggle-dot" aria-hidden="true" />
+            {theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
+          </button>
           <button type="button" className="admin-logout" onClick={handleLogout}>
             Sair
           </button>

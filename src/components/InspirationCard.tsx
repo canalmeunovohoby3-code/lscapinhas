@@ -13,8 +13,6 @@ export function InspirationCard({
   const href = `/produto/${product.slug}${
     modelId ? `?modelo=${encodeURIComponent(modelId)}` : ''
   }`;
-  const secondaryImage = product.images[1] ?? product.images[0];
-
   return (
     <article className="product-card inspiration-card">
       <div className="product-card-media">
@@ -23,18 +21,7 @@ export function InspirationCard({
             className="product-card-image"
             src={product.images[0]}
             alt={product.name}
-            width={900}
-            height={1100}
             loading={eager ? 'eager' : 'lazy'}
-          />
-          <img
-            className="product-card-image product-card-image--hover"
-            src={secondaryImage}
-            alt=""
-            width={900}
-            height={1100}
-            loading="lazy"
-            aria-hidden="true"
           />
         </Link>
       </div>
