@@ -38,6 +38,10 @@ function CatalogImagePreview({ src, alt }: { src: string; alt: string }) {
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
   if (failed) {
     return (
       <div className="admin-image-error" role="alert">
@@ -228,6 +232,10 @@ export function AdminCatalogImagesPage() {
         alt_text: string;
         sort_order: number;
       }> = [];
+      const nextSortOrder = images.reduce(
+        (highest, image) => Math.max(highest, image.sort_order),
+        -1,
+      ) + 1;
 
       for (const [index, file] of pendingFiles.entries()) {
         const path = createCatalogImagePath(brandId, modelId, file);
@@ -235,6 +243,7 @@ export function AdminCatalogImagesPage() {
           .from(CATALOG_IMAGE_BUCKET)
           .upload(path, file, {
             contentType: file.type,
+            cacheControl: '0',
             upsert: false,
           });
 
@@ -246,7 +255,7 @@ export function AdminCatalogImagesPage() {
           model_id: modelId,
           storage_path: path,
           alt_text: `Foto de capinha para ${model.name}`,
-          sort_order: images.length + index,
+          sort_order: nextSortOrder + index,
         });
       }
 
@@ -278,21 +287,34 @@ export function AdminCatalogImagesPage() {
     setNotice(null);
 
     try {
+      const { data: deletedRows, error: deleteError } = await supabase
+        .from('catalog_model_images')
+        .delete()
+        .eq('id', image.id)
+        .eq('storage_path', image.storage_path)
+        .select('id');
+
+      if (deleteError) throw deleteError;
+
+      if (!deletedRows || deletedRows.length === 0) {
+        setNotice('A foto já havia sido alterada ou removida. Recarregando a lista.');
+        await Promise.all([loadImages(), loadSummaries()]);
+        return;
+      }
+
       const { error: storageError } = await supabase.storage
         .from(CATALOG_IMAGE_BUCKET)
         .remove([image.storage_path]);
 
-      if (storageError) throw storageError;
-
-      const { error: deleteError } = await supabase
-        .from('catalog_model_images')
-        .delete()
-        .eq('id', image.id);
-
-      if (deleteError) throw deleteError;
-
-      setNotice('Foto removida.');
       await Promise.all([loadImages(), loadSummaries()]);
+
+      if (storageError) {
+        setError(
+          'A foto foi removida do modelo, mas o arquivo antigo não pôde ser apagado do Storage.',
+        );
+      } else {
+        setNotice('Foto removida.');
+      }
     } catch {
       setError('Não foi possível remover a foto. Tente novamente.');
     } finally {
@@ -342,47 +364,47 @@ export function AdminCatalogImagesPage() {
         .from(CATALOG_IMAGE_BUCKET)
         .upload(newPath, replacement.file, {
           contentType: replacement.file.type,
+          cacheControl: '0',
           upsert: false,
         });
 
       if (uploadError) throw uploadError;
 
-      const { error: insertError } = await supabase
+      const { data: updatedRows, error: updateError } = await supabase
         .from('catalog_model_images')
-        .insert({
-          brand_id: brandId,
-          model_id: modelId,
+        .update({
           storage_path: newPath,
           alt_text: `Foto de capinha para ${model.name}`,
-          sort_order: oldImage.sort_order,
-        });
+        })
+        .eq('id', oldImage.id)
+        .eq('storage_path', oldImage.storage_path)
+        .select('id');
 
-      if (insertError) throw insertError;
+      if (updateError) throw updateError;
+
+      if (!updatedRows || updatedRows.length === 0) {
+        throw new Error('A foto foi alterada em outra sessão.');
+      }
 
       const { error: storageDeleteError } = await supabase.storage
         .from(CATALOG_IMAGE_BUCKET)
         .remove([oldImage.storage_path]);
 
-      const { error: rowDeleteError } = await supabase
-        .from('catalog_model_images')
-        .delete()
-        .eq('id', oldImage.id);
-
-      if (storageDeleteError || rowDeleteError) {
-        setError(
-          'A nova foto foi salva, mas a foto anterior não pôde ser removida completamente.',
-        );
-      } else {
-        setNotice('Foto substituída.');
-      }
-
       setReplacement(null);
       await Promise.all([loadImages(), loadSummaries()]);
+
+      if (storageDeleteError) {
+        setError(
+          'A foto foi alterada, mas o arquivo anterior não pôde ser apagado do Storage.',
+        );
+      } else {
+        setNotice('Foto alterada.');
+      }
     } catch {
       if (newPath) {
         await supabase.storage.from(CATALOG_IMAGE_BUCKET).remove([newPath]);
       }
-      setError('Não foi possível substituir a foto. Tente novamente.');
+      setError('Não foi possível alterar a foto. Tente novamente.');
     } finally {
       setBusy(false);
     }
@@ -403,7 +425,7 @@ export function AdminCatalogImagesPage() {
           <div className="admin-card-head">
             <div>
               <h2 id="catalog-summary-title">Modelos com fotos</h2>
-              <p>Abra um modelo abaixo para visualizar, substituir ou remover as fotos.</p>
+              <p>Abra um modelo abaixo para visualizar, alterar ou remover as fotos.</p>
             </div>
           </div>
 
@@ -510,7 +532,7 @@ export function AdminCatalogImagesPage() {
                   {isReplacing && replacement ? (
                     <div className="admin-catalog-preview">
                       <img src={replacement.preview} alt="Prévia da nova foto" />
-                      <span>Prévia da substituição</span>
+                      <span>Prévia da nova foto</span>
                     </div>
                   ) : imageUrl ? (
                     <CatalogImagePreview
@@ -548,7 +570,7 @@ export function AdminCatalogImagesPage() {
                     ) : (
                       <>
                         <label className="admin-catalog-action">
-                          Substituir
+                          Alterar foto
                           <input
                             type="file"
                             className="sr-only"

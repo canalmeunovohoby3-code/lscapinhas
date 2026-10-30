@@ -35,7 +35,8 @@ export function Footer() {
           <nav className="footer-column" aria-label="Navegação do rodapé">
             <h3>Navegação</h3>
             <Link to="/">Início</Link>
-            <Link to="/capinhas">Capinhas</Link>
+            <Link to="/#escolha-seu-celular">Aparelhos</Link>
+            <Link to="/carregadores">Carregadores</Link>
             <Link to="/contato">Contato</Link>
             <Link to="/solicitacao">Solicitação</Link>
           </nav>

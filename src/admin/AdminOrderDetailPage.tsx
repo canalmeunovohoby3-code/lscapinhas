@@ -4,7 +4,7 @@ import { ArrowRightIcon, WhatsAppIcon } from '../components/Icons';
 import { supabase } from '../lib/supabase';
 import { usePageMeta } from '../lib/usePageMeta';
 import { formatDateTime, shortOrderId } from './format';
-import { resolveOrderItem } from './orderItems';
+import { formatOrderItemLabel, resolveOrderItem } from './orderItems';
 import {
   STATUS_OPTIONS,
   getStatusLabel,
@@ -13,6 +13,37 @@ import {
 import type { AdminOrder, AdminOrderImage } from './types';
 import type { OrderStatus } from '../types/orders';
 import { buildAdminWhatsAppUrl } from './whatsapp';
+
+function imageKindLabel(kind: AdminOrderImage['kind']): string {
+  if (kind === 'composition') return 'Composição final';
+  if (kind === 'original') return 'Fotografia original';
+  return 'Referência';
+}
+
+function formatDesignMetadata(metadata: AdminOrderImage['metadata']): string | null {
+  if (!metadata) return null;
+
+  const placement = metadata.placement as
+    | { x?: number; y?: number; scale?: number; rotation?: number }
+    | undefined;
+  const version = typeof metadata.manifestVersion === 'string' ? metadata.manifestVersion : null;
+
+  if (!placement && !version) return null;
+
+  const parts: string[] = [];
+
+  if (version) parts.push(`Mockup v${version}`);
+
+  if (placement) {
+    const x = typeof placement.x === 'number' ? placement.x.toFixed(2) : '0.00';
+    const y = typeof placement.y === 'number' ? placement.y.toFixed(2) : '0.00';
+    const scale = typeof placement.scale === 'number' ? Math.round(placement.scale * 100) : 100;
+    const rotation = typeof placement.rotation === 'number' ? placement.rotation : 0;
+    parts.push(`posição ${x}/${y} · zoom ${scale}% · rotação ${rotation}°`);
+  }
+
+  return parts.join(' · ');
+}
 
 export function AdminOrderDetailPage() {
   usePageMeta('Detalhes do pedido | Admin LS Case');
@@ -132,6 +163,8 @@ export function AdminOrderDetailPage() {
     setDeleteError(null);
 
     try {
+      const paths = (order.order_images ?? []).map((image) => image.storage_path);
+
       const { data, error: deleteOrderError } = await supabase.rpc('admin_delete_order', {
         p_order_id: order.id,
       });
@@ -139,13 +172,13 @@ export function AdminOrderDetailPage() {
       if (deleteOrderError) throw deleteOrderError;
       if (data !== true) throw new Error('Pedido não encontrado.');
 
-      const paths = (order.order_images ?? []).map((image) => image.storage_path);
       let storageWarning = false;
 
       if (paths.length > 0) {
         const { error: storageError } = await supabase.storage
           .from('order-images')
           .remove(paths);
+
         storageWarning = Boolean(storageError);
       }
 
@@ -153,12 +186,14 @@ export function AdminOrderDetailPage() {
         replace: true,
         state: {
           adminNotice: storageWarning
-            ? 'Pedido excluído, mas algumas imagens não puderam ser removidas do Storage.'
-            : 'Pedido excluído.',
+            ? 'Pedido, itens e referências excluídos; alguns arquivos não puderam ser removidos do Storage.'
+            : 'Pedido, itens e arquivos excluídos.',
         },
       });
     } catch {
-      setDeleteError('Não foi possível excluir o pedido. Tente novamente.');
+      setDeleteError(
+        'A exclusão foi interrompida. Revise o pedido no painel e tente novamente.',
+      );
       setDeleting(false);
     }
   }
@@ -336,8 +371,8 @@ export function AdminOrderDetailPage() {
         <section className="admin-card admin-card--wide" aria-labelledby="admin-images-title">
           <div className="admin-card-head">
             <div>
-              <h2 id="admin-images-title">Imagens de referência</h2>
-              <p>Links temporários gerados a partir do bucket privado.</p>
+              <h2 id="admin-images-title">Fotografias e composições</h2>
+              <p>Links temporários gerados a partir do bucket privado. Cada arquivo indica o item correspondente.</p>
             </div>
           </div>
 
@@ -348,6 +383,8 @@ export function AdminOrderDetailPage() {
               {images.map((image) => {
                 const signedUrl = signedUrls[image.storage_path];
                 const imageError = imageErrors[image.storage_path];
+                const linkedItem = items.find((item) => item.id === image.order_item_id);
+                const design = formatDesignMetadata(image.metadata);
 
                 return (
                   <div key={image.id} className="admin-image-card">
@@ -359,14 +396,19 @@ export function AdminOrderDetailPage() {
                         className="admin-image-link"
                         aria-label={`Abrir ${image.file_name ?? 'imagem'}`}
                       >
-                        <img src={signedUrl} alt={image.file_name ?? 'Imagem de referência'} />
+                        <img src={signedUrl} alt={image.file_name ?? 'Imagem do pedido'} />
                       </a>
                     ) : (
                       <div className="admin-image-error" role="alert">
                         {imageError ?? 'Carregando imagem...'}
                       </div>
                     )}
+                    <span className="admin-image-kind">{imageKindLabel(image.kind)}</span>
                     <span className="admin-image-name">{image.file_name ?? 'Imagem'}</span>
+                    <span className="admin-image-meta">
+                      {linkedItem ? formatOrderItemLabel(linkedItem) : 'Sem item vinculado'}
+                    </span>
+                    {design && <span className="admin-image-meta">{design}</span>}
                   </div>
                 );
               })}

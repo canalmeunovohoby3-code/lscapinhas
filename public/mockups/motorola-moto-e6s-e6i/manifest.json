@@ -1,0 +1,113 @@
+{
+  "id": "motorola-moto-e6s-e6i",
+  "version": "1.0.0",
+  "brand": "Motorola",
+  "model": "Moto E6s / E6i",
+  "source": {
+    "deviceId": "604ab840a385f458d74e535d",
+    "api": "https://case4you.com.br/api/devices/604ab840a385f458d74e535d",
+    "assetBase": "https://case4you.s3.amazonaws.com/devices/604ab840a385f458d74e535d/images/",
+    "authorization": "Autorização declarada pelo cliente para uso neste projeto."
+  },
+  "nativeSize": {
+    "width": 280,
+    "height": 560,
+    "aspectRatio": "280:560"
+  },
+  "referenceDisplaySize": {
+    "width": 125,
+    "height": 250
+  },
+  "layers": [
+    {
+      "name": "base",
+      "file": "base.png",
+      "role": "phone-base"
+    },
+    {
+      "name": "mask",
+      "file": "print-mask.png",
+      "role": "photo-mask"
+    },
+    {
+      "name": "photo",
+      "file": null,
+      "role": "user-photo"
+    },
+    {
+      "name": "camera",
+      "file": "camera.png",
+      "role": "camera-overlay"
+    },
+    {
+      "name": "border",
+      "file": "border.png",
+      "role": "case-border-overlay"
+    }
+  ],
+  "composition": [
+    "base",
+    "photo masked by mask",
+    "camera",
+    "border"
+  ],
+  "printArea": {
+    "x": 17,
+    "y": 24,
+    "width": 248,
+    "height": 521
+  },
+  "cameraBounds": {
+    "x": 21,
+    "y": 17,
+    "width": 150,
+    "height": 504
+  },
+  "alphaBounds": {
+    "base": {
+      "x": 0,
+      "y": 9,
+      "width": 280,
+      "height": 551
+    },
+    "mask": {
+      "x": 17,
+      "y": 24,
+      "width": 248,
+      "height": 521
+    },
+    "camera": {
+      "x": 21,
+      "y": 17,
+      "width": 150,
+      "height": 504
+    },
+    "border": {
+      "x": 0,
+      "y": 0,
+      "width": 280,
+      "height": 560
+    }
+  },
+  "export": {
+    "canvas": {
+      "width": 1600,
+      "height": 2400
+    },
+    "fit": "contain",
+    "box": {
+      "x": 200,
+      "y": 0,
+      "width": 1200,
+      "height": 2400
+    },
+    "upscale": 4.285714285714286,
+    "note": "Assets nativos preservados; canvas 1600x2400 com contain, sem distorção."
+  },
+  "printMask": {
+    "file": "print-mask.png",
+    "source": "mask.png",
+    "algorithm": "fidelidade à máscara de corte da referência; sem recorte retangular de câmera",
+    "version": "2.0.0"
+  }
+}

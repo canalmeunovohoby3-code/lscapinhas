@@ -1,0 +1,113 @@
+{
+  "id": "iphone-16-pro-max",
+  "version": "1.0.0",
+  "brand": "Apple",
+  "model": "iPhone 16 Pro Max",
+  "source": {
+    "deviceId": "6706c4e6491a5976f7f509c1",
+    "api": "https://case4you.com.br/api/devices/6706c4e6491a5976f7f509c1",
+    "assetBase": "https://case4you.s3.amazonaws.com/devices/6706c4e6491a5976f7f509c1/images/",
+    "authorization": "Autorização declarada pelo cliente para uso neste projeto."
+  },
+  "nativeSize": {
+    "width": 280,
+    "height": 560,
+    "aspectRatio": "280:560"
+  },
+  "referenceDisplaySize": {
+    "width": 125,
+    "height": 250
+  },
+  "layers": [
+    {
+      "name": "base",
+      "file": "base.png",
+      "role": "phone-base"
+    },
+    {
+      "name": "mask",
+      "file": "print-mask.png",
+      "role": "photo-mask"
+    },
+    {
+      "name": "photo",
+      "file": null,
+      "role": "user-photo"
+    },
+    {
+      "name": "camera",
+      "file": "camera.png",
+      "role": "camera-overlay"
+    },
+    {
+      "name": "border",
+      "file": "border.png",
+      "role": "case-border-overlay"
+    }
+  ],
+  "composition": [
+    "base",
+    "photo masked by mask",
+    "camera",
+    "border"
+  ],
+  "printArea": {
+    "x": 14,
+    "y": 18,
+    "width": 253,
+    "height": 525
+  },
+  "cameraBounds": {
+    "x": 21,
+    "y": 24,
+    "width": 139,
+    "height": 141
+  },
+  "alphaBounds": {
+    "base": {
+      "x": 6,
+      "y": 11,
+      "width": 267,
+      "height": 539
+    },
+    "mask": {
+      "x": 14,
+      "y": 18,
+      "width": 253,
+      "height": 525
+    },
+    "camera": {
+      "x": 21,
+      "y": 24,
+      "width": 139,
+      "height": 141
+    },
+    "border": {
+      "x": 0,
+      "y": 0,
+      "width": 280,
+      "height": 560
+    }
+  },
+  "export": {
+    "canvas": {
+      "width": 1600,
+      "height": 2400
+    },
+    "fit": "contain",
+    "box": {
+      "x": 200,
+      "y": 0,
+      "width": 1200,
+      "height": 2400
+    },
+    "upscale": 4.285714285714286,
+    "note": "Assets nativos preservados; canvas 1600x2400 com contain, sem distorção."
+  },
+  "printMask": {
+    "file": "print-mask.png",
+    "source": "mask.png",
+    "algorithm": "fidelidade à máscara de corte da referência; sem recorte retangular de câmera",
+    "version": "2.0.0"
+  }
+}

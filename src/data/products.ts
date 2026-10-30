@@ -402,7 +402,6 @@ export const products: Product[] = [
       'galaxy-a35',
       'moto-g34',
       'redmi-13c',
-      'poco-m6',
     ],
     variants: [
       { id: 'creme', name: 'Creme', swatch: '#FBEFD9' },

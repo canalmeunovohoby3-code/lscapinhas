@@ -1,0 +1,113 @@
+{
+  "id": "xiaomi-redmi-8a",
+  "version": "1.0.0",
+  "brand": "Xiaomi",
+  "model": "Redmi 8A",
+  "source": {
+    "deviceId": "5e3afb35486dc756716130fe",
+    "api": "https://case4you.com.br/api/devices/5e3afb35486dc756716130fe",
+    "assetBase": "https://case4you.s3.amazonaws.com/devices/5e3afb35486dc756716130fe/images/",
+    "authorization": "Autorização declarada pelo cliente para uso neste projeto."
+  },
+  "nativeSize": {
+    "width": 280,
+    "height": 560,
+    "aspectRatio": "280:560"
+  },
+  "referenceDisplaySize": {
+    "width": 125,
+    "height": 250
+  },
+  "layers": [
+    {
+      "name": "base",
+      "file": "base.png",
+      "role": "phone-base"
+    },
+    {
+      "name": "mask",
+      "file": "print-mask.png",
+      "role": "photo-mask"
+    },
+    {
+      "name": "photo",
+      "file": null,
+      "role": "user-photo"
+    },
+    {
+      "name": "camera",
+      "file": "camera.png",
+      "role": "camera-overlay"
+    },
+    {
+      "name": "border",
+      "file": "border.png",
+      "role": "case-border-overlay"
+    }
+  ],
+  "composition": [
+    "base",
+    "photo masked by mask",
+    "camera",
+    "border"
+  ],
+  "printArea": {
+    "x": 18,
+    "y": 30,
+    "width": 238,
+    "height": 498
+  },
+  "cameraBounds": {
+    "x": 109,
+    "y": 65,
+    "width": 98,
+    "height": 78
+  },
+  "alphaBounds": {
+    "base": {
+      "x": 7,
+      "y": 17,
+      "width": 260,
+      "height": 526
+    },
+    "mask": {
+      "x": 18,
+      "y": 30,
+      "width": 238,
+      "height": 498
+    },
+    "camera": {
+      "x": 109,
+      "y": 65,
+      "width": 98,
+      "height": 78
+    },
+    "border": {
+      "x": 0,
+      "y": 0,
+      "width": 280,
+      "height": 560
+    }
+  },
+  "export": {
+    "canvas": {
+      "width": 1600,
+      "height": 2400
+    },
+    "fit": "contain",
+    "box": {
+      "x": 200,
+      "y": 0,
+      "width": 1200,
+      "height": 2400
+    },
+    "upscale": 4.285714285714286,
+    "note": "Assets nativos preservados; canvas 1600x2400 com contain, sem distorção."
+  },
+  "printMask": {
+    "file": "print-mask.png",
+    "source": "mask.png",
+    "algorithm": "fidelidade à máscara de corte da referência; sem recorte retangular de câmera",
+    "version": "2.0.0"
+  }
+}

@@ -10,7 +10,7 @@ import { MobileMenu } from './MobileMenu';
 
 const navLinks = [
   { to: '/', label: 'Início', end: true },
-  { to: '/capinhas', label: 'Capinhas' },
+  { to: '/carregadores', label: 'Carregadores' },
   { to: '/contato', label: 'Contato' },
 ];
 
@@ -48,7 +48,7 @@ export function Header() {
     event.preventDefault();
     const query = term.trim();
     if (!query) {
-      navigate('/capinhas');
+      navigate('/#escolha-seu-celular');
       setSearchOpen(false);
       return;
     }
@@ -68,11 +68,11 @@ export function Header() {
 
     if (modelMatch) {
       setSelectedModel(modelMatch.id);
-      navigate(`/capinhas?modelo=${encodeURIComponent(modelMatch.id)}`);
+      navigate(`/?marca=${encodeURIComponent(modelMatch.brandId)}&modelo=${encodeURIComponent(modelMatch.id)}`);
     } else if (brandMatch) {
-      navigate(`/capinhas?marca=${encodeURIComponent(brandMatch.id)}`);
+      navigate(`/?marca=${encodeURIComponent(brandMatch.id)}`);
     } else {
-      navigate(`/capinhas?q=${encodeURIComponent(query)}`);
+      navigate(`/?q=${encodeURIComponent(query)}#escolha-seu-celular`);
     }
     setSearchOpen(false);
   }

@@ -1,0 +1,109 @@
+.chargers-section {
+  min-height: 45vh;
+  padding: 52px 0 84px;
+  background: #f5f7fa;
+}
+
+.chargers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.charger-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #26364a;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.charger-card-media {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  padding: 18px;
+  background: #e9edf2;
+}
+
+.charger-card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.charger-card-placeholder {
+  color: #667085;
+  font-size: 11px;
+}
+
+.charger-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 18px 20px 20px;
+}
+
+.charger-card-body h2 {
+  color: #111827;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.charger-card-body p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 8px;
+  color: #5c6878;
+  font-size: 12px;
+  line-height: 1.65;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.charger-card-price {
+  margin-top: auto;
+  padding-top: 16px;
+  color: #8a4528;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.chargers-empty {
+  padding: 46px 20px;
+  border: 1px solid #dce3eb;
+  border-radius: 16px;
+  background: #fff;
+  color: #667085;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .chargers-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .chargers-section {
+    padding: 32px 0 56px;
+  }
+
+  .chargers-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .charger-card-body {
+    padding: 15px 16px 17px;
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "id": "motorola-moto-edge-50-neo",
+  "version": "1.0.0",
+  "brand": "Motorola",
+  "model": "Moto Edge 50 Neo",
+  "source": {
+    "deviceId": "6751cc491ab9454203c46f66",
+    "api": "https://case4you.com.br/api/devices/6751cc491ab9454203c46f66",
+    "assetBase": "https://case4you.s3.amazonaws.com/devices/6751cc491ab9454203c46f66/images/",
+    "authorization": "Autorização declarada pelo cliente para uso neste projeto."
+  },
+  "nativeSize": {
+    "width": 280,
+    "height": 560,
+    "aspectRatio": "280:560"
+  },
+  "referenceDisplaySize": {
+    "width": 125,
+    "height": 250
+  },
+  "layers": [
+    {
+      "name": "base",
+      "file": "base.png",
+      "role": "phone-base"
+    },
+    {
+      "name": "mask",
+      "file": "print-mask.png",
+      "role": "photo-mask"
+    },
+    {
+      "name": "photo",
+      "file": null,
+      "role": "user-photo"
+    },
+    {
+      "name": "camera",
+      "file": "camera.png",
+      "role": "camera-overlay"
+    },
+    {
+      "name": "border",
+      "file": "border.png",
+      "role": "case-border-overlay"
+    }
+  ],
+  "composition": [
+    "base",
+    "photo masked by mask",
+    "camera",
+    "border"
+  ],
+  "printArea": {
+    "x": 17,
+    "y": 15,
+    "width": 247,
+    "height": 530
+  },
+  "cameraBounds": {
+    "x": 18,
+    "y": 14,
+    "width": 155,
+    "height": 172
+  },
+  "alphaBounds": {
+    "base": {
+      "x": 6,
+      "y": 7,
+      "width": 268,
+      "height": 547
+    },
+    "mask": {
+      "x": 17,
+      "y": 15,
+      "width": 247,
+      "height": 530
+    },
+    "camera": {
+      "x": 18,
+      "y": 14,
+      "width": 155,
+      "height": 172
+    },
+    "border": {
+      "x": 0,
+      "y": 0,
+      "width": 280,
+      "height": 560
+    }
+  },
+  "export": {
+    "canvas": {
+      "width": 1600,
+      "height": 2400
+    },
+    "fit": "contain",
+    "box": {
+      "x": 200,
+      "y": 0,
+      "width": 1200,
+      "height": 2400
+    },
+    "upscale": 4.285714285714286,
+    "note": "Assets nativos preservados; canvas 1600x2400 com contain, sem distorção."
+  },
+  "printMask": {
+    "file": "print-mask.png",
+    "source": "mask.png",
+    "algorithm": "fidelidade à máscara de corte da referência; sem recorte retangular de câmera",
+    "version": "2.0.0"
+  }
+}

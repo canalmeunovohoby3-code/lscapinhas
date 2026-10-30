@@ -42,6 +42,12 @@ export function AdminLayout() {
           >
             Fotos do catálogo
           </NavLink>
+          <NavLink
+            to="/admin/carregadores"
+            className={({ isActive }) => `admin-nav-link${isActive ? ' is-active' : ''}`}
+          >
+            Gerenciar Carregadores
+          </NavLink>
         </nav>
 
         <div className="admin-sidebar-footer">

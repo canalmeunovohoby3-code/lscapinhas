@@ -7,7 +7,7 @@ import { Modal } from './Modal';
 
 const links = [
   { to: '/', label: 'Início', end: true },
-  { to: '/capinhas', label: 'Capinhas' },
+  { to: '/carregadores', label: 'Carregadores' },
   { to: '/contato', label: 'Contato' },
 ];
 
@@ -45,7 +45,7 @@ export function MobileMenu({
       <div className="mobile-menu-divider" />
 
       {selectedModel && (
-        <Link to="/capinhas" className="mobile-model" onClick={onClose}>
+        <Link to="/#escolha-seu-celular" className="mobile-model" onClick={onClose}>
           <SmartphoneIcon width={18} height={18} />
           <span>
             Seu aparelho

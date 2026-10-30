@@ -21,12 +21,17 @@ export interface CreateOrderInput {
   items: OrderItemInput[];
 }
 
+export type OrderImageKind = 'reference' | 'original' | 'composition';
+
 export interface OrderImageInput {
   path: string;
   fileName?: string | null;
   contentType?: string | null;
   sizeBytes?: number | null;
   itemId?: string | null;
+  modelId?: string;
+  kind?: OrderImageKind;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface Order {
@@ -57,6 +62,8 @@ export interface OrderImage {
   fileName: string | null;
   contentType: string | null;
   sizeBytes: number | null;
+  kind: OrderImageKind;
+  metadata: Record<string, unknown> | null;
   createdAt: string;
 }
 

@@ -216,6 +216,40 @@ describe('submitOrder', () => {
     });
   });
 
+  it('preserva vínculo, tipo e metadados da personalização', async () => {
+    const deps = makeDeps();
+    const result = await submitOrder(
+      {
+        ...makeInput([jpeg, png]),
+        imageMeta: [
+          { modelId: 'iphone-16', kind: 'original' },
+          {
+            modelId: 'iphone-16',
+            kind: 'composition',
+            metadata: { mockupId: 'iphone-16-pro-max', placement: { x: 0, y: 0 } },
+          },
+        ],
+      },
+      deps,
+    );
+
+    expect(result.uploaded[0]).toMatchObject({
+      modelId: 'iphone-16',
+      kind: 'original',
+    });
+    expect(result.uploaded[1]).toMatchObject({
+      modelId: 'iphone-16',
+      kind: 'composition',
+      metadata: { mockupId: 'iphone-16-pro-max' },
+    });
+    expect(deps.attachImages).toHaveBeenCalledWith(
+      ORDER_ID,
+      expect.arrayContaining([
+        expect.objectContaining({ kind: 'composition', modelId: 'iphone-16' }),
+      ]),
+    );
+  });
+
   it('mantém as imagens que passaram e registra a falha parcial', async () => {
     const deps = makeDeps();
     deps.uploadImage.mockImplementation(async (_path: string, file: ImageLike) => {

@@ -1,0 +1,113 @@
+{
+  "id": "samsung-galaxy-a32-5g-6-5",
+  "version": "1.0.0",
+  "brand": "Samsung",
+  "model": "Galaxy A32 5G (6.5)",
+  "source": {
+    "deviceId": "606e33e4caae9460215aab37",
+    "api": "https://case4you.com.br/api/devices/606e33e4caae9460215aab37",
+    "assetBase": "https://case4you.s3.amazonaws.com/devices/606e33e4caae9460215aab37/images/",
+    "authorization": "Autorização declarada pelo cliente para uso neste projeto."
+  },
+  "nativeSize": {
+    "width": 280,
+    "height": 560,
+    "aspectRatio": "280:560"
+  },
+  "referenceDisplaySize": {
+    "width": 125,
+    "height": 250
+  },
+  "layers": [
+    {
+      "name": "base",
+      "file": "base.png",
+      "role": "phone-base"
+    },
+    {
+      "name": "mask",
+      "file": "print-mask.png",
+      "role": "photo-mask"
+    },
+    {
+      "name": "photo",
+      "file": null,
+      "role": "user-photo"
+    },
+    {
+      "name": "camera",
+      "file": "camera.png",
+      "role": "camera-overlay"
+    },
+    {
+      "name": "border",
+      "file": "border.png",
+      "role": "case-border-overlay"
+    }
+  ],
+  "composition": [
+    "base",
+    "photo masked by mask",
+    "camera",
+    "border"
+  ],
+  "printArea": {
+    "x": 21,
+    "y": 24,
+    "width": 241,
+    "height": 516
+  },
+  "cameraBounds": {
+    "x": 19,
+    "y": 39,
+    "width": 103,
+    "height": 138
+  },
+  "alphaBounds": {
+    "base": {
+      "x": 8,
+      "y": 10,
+      "width": 266,
+      "height": 545
+    },
+    "mask": {
+      "x": 21,
+      "y": 24,
+      "width": 241,
+      "height": 516
+    },
+    "camera": {
+      "x": 19,
+      "y": 39,
+      "width": 103,
+      "height": 138
+    },
+    "border": {
+      "x": 0,
+      "y": 0,
+      "width": 280,
+      "height": 560
+    }
+  },
+  "export": {
+    "canvas": {
+      "width": 1600,
+      "height": 2400
+    },
+    "fit": "contain",
+    "box": {
+      "x": 200,
+      "y": 0,
+      "width": 1200,
+      "height": 2400
+    },
+    "upscale": 4.285714285714286,
+    "note": "Assets nativos preservados; canvas 1600x2400 com contain, sem distorção."
+  },
+  "printMask": {
+    "file": "print-mask.png",
+    "source": "mask.png",
+    "algorithm": "fidelidade à máscara de corte da referência; sem recorte retangular de câmera",
+    "version": "2.0.0"
+  }
+}

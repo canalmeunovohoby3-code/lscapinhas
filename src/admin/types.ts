@@ -1,4 +1,4 @@
-import type { OrderStatus } from '../types/orders';
+import type { OrderImageKind, OrderStatus } from '../types/orders';
 
 export interface AdminOrderItem {
   id: string;
@@ -19,6 +19,8 @@ export interface AdminOrderImage {
   file_name: string | null;
   content_type: string | null;
   size_bytes: number | null;
+  kind: OrderImageKind;
+  metadata: Record<string, unknown> | null;
   created_at: string;
 }
 

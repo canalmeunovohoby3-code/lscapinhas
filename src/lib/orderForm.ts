@@ -66,11 +66,17 @@ export interface OrderItemPayload {
   quantity: number;
 }
 
+export type OrderImageKind = 'reference' | 'original' | 'composition';
+
 export interface OrderImagePayload {
   path: string;
   fileName: string;
   contentType: string;
   sizeBytes: number;
+  itemId?: string | null;
+  modelId?: string;
+  kind?: OrderImageKind;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface OrderFormInput {
@@ -95,6 +101,7 @@ export interface OrderSubmissionInput<TFile extends ImageLike> {
   notes: string;
   items: OrderItemPayload[];
   images: readonly TFile[];
+  imageMeta?: readonly Partial<OrderImagePayload>[];
   idempotencyKey: string;
 }
 
@@ -283,11 +290,16 @@ export async function submitOrder<TFile extends ImageLike>(
       if (!uploadToken) throw new Error('Token de upload ausente.');
       const path = deps.makePath(orderId, uploadToken, file);
       await deps.uploadImage(path, file);
+      const imageMeta = input.imageMeta?.[index];
       uploaded.push({
         path,
         fileName: file.name,
         contentType: file.type,
         sizeBytes: file.size,
+        itemId: imageMeta?.itemId ?? null,
+        modelId: imageMeta?.modelId,
+        kind: imageMeta?.kind ?? 'reference',
+        metadata: imageMeta?.metadata ?? null,
       });
     } catch {
       failedImages.push(file.name);

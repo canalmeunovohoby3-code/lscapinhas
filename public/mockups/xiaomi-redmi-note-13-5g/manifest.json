@@ -1,0 +1,113 @@
+{
+  "id": "xiaomi-redmi-note-13-5g",
+  "version": "1.0.0",
+  "brand": "Xiaomi",
+  "model": "Redmi Note 13 5G",
+  "source": {
+    "deviceId": "669a9a92c78f565a553cec9a",
+    "api": "https://case4you.com.br/api/devices/669a9a92c78f565a553cec9a",
+    "assetBase": "https://case4you.s3.amazonaws.com/devices/669a9a92c78f565a553cec9a/images/",
+    "authorization": "Autorização declarada pelo cliente para uso neste projeto."
+  },
+  "nativeSize": {
+    "width": 280,
+    "height": 560,
+    "aspectRatio": "280:560"
+  },
+  "referenceDisplaySize": {
+    "width": 125,
+    "height": 250
+  },
+  "layers": [
+    {
+      "name": "base",
+      "file": "base.png",
+      "role": "phone-base"
+    },
+    {
+      "name": "mask",
+      "file": "print-mask.png",
+      "role": "photo-mask"
+    },
+    {
+      "name": "photo",
+      "file": null,
+      "role": "user-photo"
+    },
+    {
+      "name": "camera",
+      "file": "camera.png",
+      "role": "camera-overlay"
+    },
+    {
+      "name": "border",
+      "file": "border.png",
+      "role": "case-border-overlay"
+    }
+  ],
+  "composition": [
+    "base",
+    "photo masked by mask",
+    "camera",
+    "border"
+  ],
+  "printArea": {
+    "x": 16,
+    "y": 14,
+    "width": 249,
+    "height": 532
+  },
+  "cameraBounds": {
+    "x": 29,
+    "y": 27,
+    "width": 152,
+    "height": 158
+  },
+  "alphaBounds": {
+    "base": {
+      "x": 6,
+      "y": 6,
+      "width": 268,
+      "height": 549
+    },
+    "mask": {
+      "x": 16,
+      "y": 14,
+      "width": 249,
+      "height": 532
+    },
+    "camera": {
+      "x": 29,
+      "y": 27,
+      "width": 152,
+      "height": 158
+    },
+    "border": {
+      "x": 0,
+      "y": 0,
+      "width": 280,
+      "height": 560
+    }
+  },
+  "export": {
+    "canvas": {
+      "width": 1600,
+      "height": 2400
+    },
+    "fit": "contain",
+    "box": {
+      "x": 200,
+      "y": 0,
+      "width": 1200,
+      "height": 2400
+    },
+    "upscale": 4.285714285714286,
+    "note": "Assets nativos preservados; canvas 1600x2400 com contain, sem distorção."
+  },
+  "printMask": {
+    "file": "print-mask.png",
+    "source": "mask.png",
+    "algorithm": "fidelidade à máscara de corte da referência; sem recorte retangular de câmera",
+    "version": "2.0.0"
+  }
+}

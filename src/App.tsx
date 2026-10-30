@@ -5,12 +5,13 @@ import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
 import { Toast } from './components/Toast';
 import { HomePage } from './pages/HomePage';
-import { CatalogPage } from './pages/CatalogPage';
+import { ChargersPage } from './pages/ChargersPage';
 import { CartPage } from './pages/CartPage';
 import { OrderPage } from './pages/OrderPage';
 import { ContactPage } from './pages/ContactPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { AdminApp } from './admin/AdminApp';
+import { CustomizerPage } from './customizer/CustomizerPage';
 
 function PublicStore() {
   return (
@@ -23,9 +24,10 @@ function PublicStore() {
       <main id="conteudo" className="site-main">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/capinhas" element={<CatalogPage />} />
-          <Route path="/personalizadas" element={<Navigate to="/capinhas" replace />} />
-          <Route path="/produto/:slug" element={<Navigate to="/capinhas" replace />} />
+          <Route path="/carregadores" element={<ChargersPage />} />
+          <Route path="/capinhas" element={<Navigate to="/#escolha-seu-celular" replace />} />
+          <Route path="/personalizadas" element={<Navigate to="/#escolha-seu-celular" replace />} />
+          <Route path="/produto/:slug" element={<Navigate to="/#escolha-seu-celular" replace />} />
           <Route path="/solicitacao" element={<CartPage />} />
           <Route path="/carrinho" element={<CartPage />} />
           <Route path="/pedido" element={<OrderPage />} />
@@ -44,6 +46,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/admin/*" element={<AdminApp />} />
+        <Route path="/personalizador" element={<CustomizerPage />} />
         <Route path="/*" element={<PublicStore />} />
       </Routes>
     </BrowserRouter>
